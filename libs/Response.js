@@ -26,7 +26,7 @@ Response.prototype.sendBadRequestError = function(message) {
     var payload = JSON.stringify({
         error: message
     });
-    res.writeHead(901, {
+    res.writeHead(400, {
         'Content-Type': 'application/json',
         'Content-Length': payload.length
     });
