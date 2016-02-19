@@ -1,5 +1,5 @@
 var util = require('util');
-var Event = require('./event.js');
+var Event = require('../Event.js');
 
 function RequestConfigEvent() {
     Event.apply(this, arguments);

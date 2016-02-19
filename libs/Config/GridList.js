@@ -6,6 +6,6 @@ function GridList() {
 
     this.type = 'GRID_LIST';
 }
-util.inherit(GridList, Setting);
+util.inherits(GridList, Setting);
 
 module.exports = GridList;

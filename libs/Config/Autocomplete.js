@@ -7,7 +7,7 @@ function Autocomplete() {
     this.minChars = 0;
     this.asYouType = false;
 }
-util.inherit(Autocomplete, Setting);
+util.inherits(Autocomplete, Setting);
 
 Autocomplete.prototype.setAsYouType = function(minChars) {
     if (minChars === false) {
