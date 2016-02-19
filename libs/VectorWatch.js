@@ -4,6 +4,7 @@ var util = require('util');
 var EventEmitter = require('events').EventEmitter;
 var http = require('http');
 var consts = require('./consts.js');
+var Event = require('./Event.js');
 
 function VectorWatch(options) {
     EventEmitter.call(this);
@@ -61,7 +62,7 @@ VectorWatch.prototype.middleware = function(req, res, next) {
             return next();
         }
 
-        var event = Event.fromRequest(this, req);
+        var event = Event.fromRequest(_this, req);
         var response = event.createResponse(res);
 
         if (event.shouldEmit()) {
@@ -82,13 +83,13 @@ VectorWatch.prototype.middleware = function(req, res, next) {
     });
 };
 
-VectorWatch.prototype.createServer = function(port) {
+VectorWatch.prototype.createServer = function(port, cb) {
     var _this = this;
     var server = http.createServer(function(req, res) {
         _this.middleware(req, res);
     });
 
-    server.listen(port);
+    server.listen(port, cb);
     return server;
 };
 
