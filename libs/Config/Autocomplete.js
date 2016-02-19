@@ -21,6 +21,7 @@ Autocomplete.prototype.setAsYouType = function(minChars) {
         this.minChars = minChars;
         this.type = 'INPUT_LIST';
     }
+    return this;
 };
 
 Autocomplete.prototype.getRenderSettingsObject = function() {

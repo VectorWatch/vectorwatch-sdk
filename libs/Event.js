@@ -7,6 +7,7 @@ function Event(server, req) {
     this.eventName = 'generic';
     this.server = server;
     this.req = req;
+    this.authTokens = null;
 }
 
 Event.prototype.getServer = function() {
@@ -18,14 +19,21 @@ Event.prototype.getEventName = function() {
 };
 
 Event.prototype.getAuthTokensAsync = function() {
-    var authCredentials = this.getAuthCredentials();
+    if (this.authTokens != null) {
+        return Promise.resolve(this.authTokens);
+    }
+
+    var authCredentials = this.getAuthCredentials(), _this = this;
     if (!authCredentials) {
         return Promise.resolve();
     }
 
     var authProvider = this.getServer().getAuthProvider();
     if (authProvider) {
-        return authProvider.getAuthTokensAsync(authCredentials);
+        return authProvider.getAuthTokensAsync(authCredentials).then(function(authTokens) {
+            _this.authTokens = authTokens;
+            return authTokens;
+        });
     }
     return Promise.resolve();
 };

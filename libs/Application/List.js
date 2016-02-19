@@ -17,6 +17,7 @@ util.inherits(List, Packet);
 
 List.prototype.setWatchface = function(watchfaceId) {
     this.watchfaceId = watchfaceId;
+    return this;
 };
 
 List.prototype.createTextItem = function(id, label) {

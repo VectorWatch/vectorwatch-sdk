@@ -18,6 +18,7 @@ ChangeWatchfaceCommand.prototype.setAnimation = function(animation) {
     }
 
     this.animation = animation;
+    return this;
 };
 
 ChangeWatchfaceCommand.prototype.setAlert = function(alert) {
@@ -26,6 +27,7 @@ ChangeWatchfaceCommand.prototype.setAlert = function(alert) {
     }
 
     this.alert = !!alert;
+    return this;
 };
 
 ChangeWatchfaceCommand.prototype.toObject = function() {

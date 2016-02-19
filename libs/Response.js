@@ -16,6 +16,24 @@ Response.prototype.getPayloadAsync = function() {
     return Promise.resolve();
 };
 
+Response.prototype.sendBadRequestError = function(message) {
+    if (this.isExpired() || this.isSent()) {
+        return;
+    }
+
+    this.sent = true;
+
+    var payload = JSON.stringify({
+        error: message
+    });
+    res.writeHead(901, {
+        'Content-Type': 'application/json',
+        'Content-Length': payload.length
+    });
+    res.write(payload);
+    res.end();
+};
+
 Response.prototype.sendInvalidAuthTokens = function() {
     if (this.isExpired() || this.isSent()) {
         return;

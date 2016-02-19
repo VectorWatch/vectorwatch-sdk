@@ -11,6 +11,7 @@ util.inherits(SubscribeToStreamResponse, Response);
 
 SubscribeToStreamResponse.prototype.setValue = function(value) {
     this.value = value;
+    return this;
 };
 
 SubscribeToStreamResponse.prototype.getPayloadAsync = function() {

@@ -27,6 +27,7 @@ TextItem.prototype.setOnSelectAction = function(action) {
     }
 
     this.selectAction = action;
+    return this;
 };
 
 module.exports = TextItem;

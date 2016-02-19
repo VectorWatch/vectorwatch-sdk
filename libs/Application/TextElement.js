@@ -12,6 +12,7 @@ util.inherits(TextElement, Packet);
 
 TextElement.prototype.setWatchface = function(watchfaceId) {
     this.watchfaceId = watchfaceId;
+    return this;
 };
 
 TextElement.prototype.toObject = function() {

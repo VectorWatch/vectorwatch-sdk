@@ -15,6 +15,7 @@ CheckboxItem.prototype.setChecked = function(checked) {
     }
 
     this.checked = !!checked;
+    return this;
 };
 
 CheckboxItem.prototype.toObject = function() {

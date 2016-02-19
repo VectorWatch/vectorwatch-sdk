@@ -5,6 +5,7 @@ function Packet() {
 
 Packet.prototype.setTTL = function(ttl) {
     this.ttl = ttl;
+    return this;
 };
 
 Packet.prototype.toObject = function() {

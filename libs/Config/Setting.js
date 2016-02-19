@@ -10,6 +10,7 @@ function Setting() {
 
 Setting.prototype.setHint = function(hint) {
     this.hint = hint;
+    return this;
 };
 
 Setting.prototype.setDynamic = function(dynamic) {
@@ -18,6 +19,7 @@ Setting.prototype.setDynamic = function(dynamic) {
     }
 
     this.dynamic = !!dynamic;
+    return this;
 };
 
 Setting.prototype.addOption = function(name, value) {
@@ -50,6 +52,7 @@ Setting.prototype.setDefaultOption = function(option) {
     }
 
     this.defaultOption = option;
+    return this;
 };
 
 Setting.prototype.getRenderSettingsObject = function() {
