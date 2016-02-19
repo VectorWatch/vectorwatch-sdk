@@ -19,6 +19,8 @@ UserSettings.fromUserSettingsObject = function(object) {
     for (var settingName in object) {
         userSettings.settings[settingName] = object[settingName].value;
     }
+
+    return userSettings;
 };
 
 module.exports = UserSettings;

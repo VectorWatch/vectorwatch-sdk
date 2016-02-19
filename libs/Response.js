@@ -1,12 +1,16 @@
 var Promise = require('bluebird');
+var util = require('util');
+var EventEmitter = require('events').EventEmitter;
 
 function Response(server, res, event) {
+    EventEmitter.call(this);
     this.sent = false;
     this.expired = false;
     this.event = event;
     this.res = res;
     this.server = server;
 }
+util.inherits(Response, EventEmitter);
 
 Response.prototype.getServer = function() {
     return this.server;
@@ -26,12 +30,12 @@ Response.prototype.sendBadRequestError = function(message) {
     var payload = JSON.stringify({
         error: message
     });
-    res.writeHead(400, {
-        'Content-Type': 'application/json',
-        'Content-Length': payload.length
+    this.res.writeHead(400, {
+        'Content-Type': 'application/json'
     });
-    res.write(payload);
-    res.end();
+    this.res.write(payload);
+    this.res.end();
+    this.emit('send');
 };
 
 Response.prototype.sendInvalidAuthTokens = function() {
@@ -44,12 +48,12 @@ Response.prototype.sendInvalidAuthTokens = function() {
     var payload = JSON.stringify({
         error: 'Invalid auth tokens.'
     });
-    res.writeHead(901, {
-        'Content-Type': 'application/json',
-        'Content-Length': payload.length
+    this.res.writeHead(901, {
+        'Content-Type': 'application/json'
     });
-    res.write(payload);
-    res.end();
+    this.res.write(payload);
+    this.res.end();
+    this.emit('send');
 };
 
 Response.prototype.send = function() {
@@ -58,19 +62,20 @@ Response.prototype.send = function() {
     }
 
     this.sent = true;
+    var _this = this;
 
     this.getPayloadAsync().then(function(payloadObject) {
         var payload = JSON.stringify({
             v: 1,
-            p: payloadObject()
+            p: payloadObject
         });
 
-        res.writeHead(200, {
-            'Content-Type': 'application/json',
-            'Content-Length': payload.length
+        _this.res.writeHead(200, {
+            'Content-Type': 'application/json'
         });
-        res.write(payload);
-        res.end();
+        _this.res.write(payload);
+        _this.res.end();
+        _this.emit('send');
     });
 };
 
