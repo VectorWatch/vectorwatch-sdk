@@ -40,7 +40,7 @@ StreamPushPacket.prototype.setChannelLabel = function(channelLabel) {
 StreamPushPacket.prototype.toObject = function() {
     var packet = PushPacket.prototype.toObject.call(this);
     packet.channelLabel = this.channelLabel;
-    this.d = this.value;
+    packet.d = this.value;
     return packet;
 };
 
