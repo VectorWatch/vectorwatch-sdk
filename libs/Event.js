@@ -71,7 +71,7 @@ Event.fromRequest = function(server, req) {
         Event = require('./Auth/RequestAuthEvent.js');
     } else if (eventType == 'REQ_CONFIG') {
         Event = require('./Config/RequestConfigEvent.js');
-    } else if (eventType == 'REQ_OPTIONS') {
+    } else if (eventType == 'REQ_OPTS') {
         Event = require('./Options/RequestOptionsEvent.js');
     } else if (eventType == 'USR_REG') {
         Event = require('./Stream/SubscribeToStreamEvent.js');
