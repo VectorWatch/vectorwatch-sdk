@@ -1,6 +1,12 @@
 var util = require('util');
 var Packet = require('./Packet.js');
 
+/**
+ * @param elementId {Number}
+ * @param value {String}
+ * @constructor
+ * @augments Packet
+ */
 function TextElement(elementId, value) {
     Packet.call(this);
 
@@ -10,11 +16,19 @@ function TextElement(elementId, value) {
 }
 util.inherits(TextElement, Packet);
 
+/**
+ * Sets the watchface where this element is
+ * @param watchfaceId {Number}
+ * @returns {TextElement}
+ */
 TextElement.prototype.setWatchface = function(watchfaceId) {
     this.watchfaceId = watchfaceId;
     return this;
 };
 
+/**
+ * @inheritdoc
+ */
 TextElement.prototype.toObject = function() {
     var packet = Packet.prototype.toObject.call(this);
 

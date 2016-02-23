@@ -1,6 +1,10 @@
 var util = require('util');
 var Setting = require('./Setting.js');
 
+/**
+ * @constructor
+ * @augments Setting
+ */
 function Autocomplete() {
     Setting.call(this);
     this.type = 'INPUT_LIST_STRICT';
@@ -9,11 +13,17 @@ function Autocomplete() {
 }
 util.inherits(Autocomplete, Setting);
 
+/**
+ * Marks this setting as a dynamic autocomplete list
+ * @param [minChars=3] {Number} The minimum number of characters entered in order to emit an options event
+ * @returns {Autocomplete}
+ */
 Autocomplete.prototype.setAsYouType = function(minChars) {
     if (minChars === false) {
         this.asYouType = false;
         this.type = 'INPUT_LIST_STRICT';
     } else {
+        this.dynamic = true;
         if (minChars == null || minChars === true) {
             minChars = 3;
         }
@@ -24,6 +34,9 @@ Autocomplete.prototype.setAsYouType = function(minChars) {
     return this;
 };
 
+/**
+ * @inheritdoc
+ */
 Autocomplete.prototype.getRenderSettingsObject = function() {
     var renderSettings = Setting.prototype.getRenderSettingsObject.call(this);
 

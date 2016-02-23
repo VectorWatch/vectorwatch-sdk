@@ -1,6 +1,10 @@
 var util = require('util');
 var StreamEvent = require('./StreamEvent.js');
 
+/**
+ * @constructor
+ * @augments StreamEvent
+ */
 function SubscribeToStreamEvent() {
     StreamEvent.apply(this, arguments);
 
@@ -20,6 +24,9 @@ function SubscribeToStreamEvent() {
 }
 util.inherits(SubscribeToStreamEvent, StreamEvent);
 
+/**
+ * @inheritdoc
+ */
 SubscribeToStreamEvent.prototype.getResponseClass = function() {
     return require('./SubscribeToStreamResponse.js');
 };

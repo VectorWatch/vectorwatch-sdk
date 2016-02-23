@@ -2,6 +2,10 @@ var util = require('util');
 var Event = require('../Event.js');
 var UserSettings = require('../UserSettings.js');
 
+/**
+ * @constructor
+ * @augments Event
+ */
 function StreamEvent() {
     Event.apply(this, arguments);
 
@@ -10,16 +14,26 @@ function StreamEvent() {
 }
 util.inherits(StreamEvent, Event);
 
+/**
+ * Returns the channelLabel
+ * @returns {null|string}
+ */
 StreamEvent.prototype.getChannelLabel = function() {
     this.getUserSettings();
     return this.channelLabel;
 };
 
+/**
+ * @inheritdoc
+ */
 StreamEvent.prototype.getAuthCredentials = function() {
     this.getUserSettings();
     return this.authCredentials;
 };
 
+/**
+ * @inheritdoc
+ */
 StreamEvent.prototype.getUserSettings = function() {
     if (!this.userSettings) {
         var configStreamSettings = this.req.body.configStreamSettings || {};

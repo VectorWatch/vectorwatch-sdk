@@ -1,6 +1,10 @@
 var util = require('util');
 var Setting = require('./Setting.js');
 
+/**
+ * @constructor
+ * @augments Setting
+ */
 function GridList() {
     Setting.call(this);
 

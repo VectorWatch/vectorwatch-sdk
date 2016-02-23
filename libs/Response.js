@@ -2,6 +2,13 @@ var Promise = require('bluebird');
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
 
+/**
+ * @param server {VectorWatch}
+ * @param res {ServerResponse}
+ * @param event {Event}
+ * @constructor
+ * @augments EventEmitter
+ */
 function Response(server, res, event) {
     EventEmitter.call(this);
     this.sent = false;
@@ -12,14 +19,25 @@ function Response(server, res, event) {
 }
 util.inherits(Response, EventEmitter);
 
+/**
+ * @returns {VectorWatch}
+ */
 Response.prototype.getServer = function() {
     return this.server;
 };
 
+/**
+ * Returns a promise of an object to be sent to the vector cloud
+ * @returns {Promise<Object>}
+ */
 Response.prototype.getPayloadAsync = function() {
     return Promise.resolve();
 };
 
+/**
+ * Sends back to the vector cloud a bad request error
+ * @param message {String}
+ */
 Response.prototype.sendBadRequestError = function(message) {
     if (this.isExpired() || this.isSent()) {
         return;
@@ -38,6 +56,9 @@ Response.prototype.sendBadRequestError = function(message) {
     this.emit('send');
 };
 
+/**
+ * Sends back to the vector cloud an invalid auth tokens error
+ */
 Response.prototype.sendInvalidAuthTokens = function() {
     if (this.isExpired() || this.isSent()) {
         return;
@@ -56,6 +77,9 @@ Response.prototype.sendInvalidAuthTokens = function() {
     this.emit('send');
 };
 
+/**
+ * Sends back to cloud the response
+ */
 Response.prototype.send = function() {
     if (this.isExpired() || this.isSent()) {
         return;
@@ -79,19 +103,36 @@ Response.prototype.send = function() {
     });
 };
 
+/**
+ * Returns true if the response is already sent
+ * @returns {Boolean}
+ */
 Response.prototype.isSent = function() {
     return this.sent;
 };
 
+/**
+ * Sets the response as expired
+ * @param [value] {Boolean}
+ * @returns {Response}
+ */
 Response.prototype.setExpired = function(value) {
     this.expired = !!value;
     return this;
 };
 
+/**
+ * Returns true if the process of sending the response timed out
+ * @returns {Boolean}
+ */
 Response.prototype.isExpired = function() {
     return this.expired;
 };
 
+/**
+ * Returns the event that created this response
+ * @returns {Event}
+ */
 Response.prototype.getEvent = function() {
     return this.event;
 };

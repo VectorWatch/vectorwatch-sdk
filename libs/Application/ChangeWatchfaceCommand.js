@@ -2,6 +2,11 @@ var util = require('util');
 var Packet = require('./Packet.js');
 var consts = require('../consts.js');
 
+/**
+ * @param watchfaceId {Number}
+ * @constructor
+ * @augments Packet
+ */
 function ChangeWatchfaceCommand(watchfaceId) {
     Packet.call(this);
 
@@ -12,6 +17,11 @@ function ChangeWatchfaceCommand(watchfaceId) {
 }
 util.inherits(ChangeWatchfaceCommand, Packet);
 
+/**
+ * Sets the animation type
+ * @param animation {Animations}
+ * @returns {ChangeWatchfaceCommand}
+ */
 ChangeWatchfaceCommand.prototype.setAnimation = function(animation) {
     if (!consts.Animations[animation]) {
         throw new TypeError('Invalid animation supplied.');
@@ -21,6 +31,11 @@ ChangeWatchfaceCommand.prototype.setAnimation = function(animation) {
     return this;
 };
 
+/**
+ * Sets the watch to vibrate when changing the watchface
+ * @param [alert] {Boolean}
+ * @returns {ChangeWatchfaceCommand}
+ */
 ChangeWatchfaceCommand.prototype.setAlert = function(alert) {
     if (alert == null) {
         alert = true;
@@ -30,6 +45,9 @@ ChangeWatchfaceCommand.prototype.setAlert = function(alert) {
     return this;
 };
 
+/**
+ * @inheritdoc
+ */
 ChangeWatchfaceCommand.prototype.toObject = function() {
     var packet = Packet.prototype.toObject.call(this);
 

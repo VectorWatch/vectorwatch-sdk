@@ -1,6 +1,11 @@
 var UserSettings = require('./UserSettings.js');
 var Promise = require('bluebird');
 
+/**
+ * @param server {VectorWatch}
+ * @param req {IncomingMessage}
+ * @constructor
+ */
 function Event(server, req) {
     this.userSettings = null;
     this.authProvider = null;
@@ -10,14 +15,25 @@ function Event(server, req) {
     this.authTokens = null;
 }
 
+/**
+ * @returns {VectorWatch}
+ */
 Event.prototype.getServer = function() {
     return this.server;
 };
 
+/**
+ * Returns the event name
+ * @returns {String}
+ */
 Event.prototype.getEventName = function() {
     return this.eventName;
 };
 
+/**
+ * Returns a promise of auth tokens for use with an external service
+ * @returns {Promise<Object>}
+ */
 Event.prototype.getAuthTokensAsync = function() {
     if (this.authTokens != null) {
         return Promise.resolve(this.authTokens);
@@ -38,10 +54,18 @@ Event.prototype.getAuthTokensAsync = function() {
     return Promise.resolve();
 };
 
+/**
+ * Returns the auth credentials
+ * @returns {Object}
+ */
 Event.prototype.getAuthCredentials = function() {
     return this.req.body.auth;
 };
 
+/**
+ * Returns the user settings
+ * @returns {UserSettings}
+ */
 Event.prototype.getUserSettings = function() {
     if (!this.userSettings) {
         this.userSettings = UserSettings.fromUserSettingsObject(this.req.body.userSettings);
@@ -50,20 +74,38 @@ Event.prototype.getUserSettings = function() {
     return this.userSettings;
 };
 
+/**
+ * @returns {Boolean}
+ */
 Event.prototype.shouldEmit = function() {
     return true;
 };
 
+/**
+ * Creates a concrete response based on event type
+ * @param res {ServerResponse}
+ * @returns {Response}
+ */
 Event.prototype.createResponse = function(res) {
     var Response = this.getResponseClass();
     var response = new Response(this.getServer(), res, this);
     return response;
 };
 
+/**
+ * Returns the response class name for this event type
+ * @returns {Response}
+ */
 Event.prototype.getResponseClass = function() {
     return require('./Response.js');
 };
 
+/**
+ * Creates a concrete event based on request data
+ * @param server {VectorWatch}
+ * @param req {IncomingMessage}
+ * @returns {Event}
+ */
 Event.fromRequest = function(server, req) {
     var Event = null;
     var eventType = req.body.eventType;

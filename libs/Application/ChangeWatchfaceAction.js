@@ -2,6 +2,11 @@ var util = require('util');
 var Action = require('./Action.js');
 var consts = require('../consts.js');
 
+/**
+ * @param watchfaceId {Number}
+ * @constructor
+ * @augments Action
+ */
 function ChangeWatchfaceAction(watchfaceId) {
     Action.call(this);
 
@@ -12,6 +17,11 @@ function ChangeWatchfaceAction(watchfaceId) {
 }
 util.inherits(ChangeWatchfaceAction, Action);
 
+/**
+ * Sets the animation type
+ * @param animation {Animations}
+ * @returns {ChangeWatchfaceAction}
+ */
 ChangeWatchfaceAction.prototype.setAnimation = function(animation) {
     if (!consts.Animations[animation]) {
         throw new TypeError('Invalid animation supplied.');
@@ -21,6 +31,11 @@ ChangeWatchfaceAction.prototype.setAnimation = function(animation) {
     return this;
 };
 
+/**
+ * Sets the watch to vibrate when changing the watchface
+ * @param [alert] {Boolean}
+ * @returns {ChangeWatchfaceAction}
+ */
 ChangeWatchfaceAction.prototype.setAlert = function(alert) {
     if (alert == null) {
         alert = true;
@@ -30,6 +45,9 @@ ChangeWatchfaceAction.prototype.setAlert = function(alert) {
     return this;
 };
 
+/**
+ * @inheritdoc
+ */
 ChangeWatchfaceAction.prototype.toObject = function() {
     var action = Action.prototype.toObject.call(this);
     action.changeWatchfaceIndex = this.watchfaceId;
