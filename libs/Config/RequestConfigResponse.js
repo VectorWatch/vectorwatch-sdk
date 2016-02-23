@@ -36,6 +36,7 @@ RequestConfigResponse.prototype.getPayloadAsync = function() {
         var setting = this.settings[settingName];
 
         payload.renderOptions[settingName] = setting.getRenderSettingsObject();
+        payload.renderOptions[settingName].order = index++;
         payload.settings[settingName] = setting.getOptionsObject();
 
         var defaultOption = setting.getDefaultOptionObject();
