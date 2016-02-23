@@ -138,7 +138,7 @@ VectorWatch.prototype.getMiddleware = function() {
  * @param [delay] {Number}
  */
 VectorWatch.prototype.pushStreamValue = function(channelLabel, value, delay) {
-    var packet = new StreamPushPacket()
+    var packet = new StreamPushPacket(this)
         .setChannelLabel(channelLabel)
         .setValue(value);
 
@@ -150,7 +150,7 @@ VectorWatch.prototype.pushStreamValue = function(channelLabel, value, delay) {
  * @param channelLabel {String}
  */
 VectorWatch.prototype.pushInvalidAuthTokens = function(channelLabel) {
-    var packet = new InvalidAuthTokensPushPacket()
+    var packet = new InvalidAuthTokensPushPacket(this)
         .setChannelLabel(channelLabel);
 
     this.pushBuffer.add(packet);

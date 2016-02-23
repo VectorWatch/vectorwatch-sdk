@@ -17,7 +17,7 @@ util.inherits(PushBuffer, EventEmitter);
 /**
  * Adds a push packet to the buffer
  * @param packet {PushPacket}
- * @param [delay]
+ * @param [delay] {Number}
  */
 PushBuffer.prototype.add = function(packet, delay) {
     delay = delay || 30 * 1000;
