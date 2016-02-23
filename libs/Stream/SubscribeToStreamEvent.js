@@ -11,7 +11,7 @@ function SubscribeToStreamEvent() {
 
     var credentialsKey = null;
     if (authProvider) {
-        credentialsKey = authProvider.getCredentialsKey(event.getAuthCredentials());
+        credentialsKey = authProvider.getCredentialsKey(this.getAuthCredentials());
     }
 
     storageProvider.storeUserSettingsAsync(this.getChannelLabel(), this.getUserSettings().toObject(), credentialsKey).then(function() {
