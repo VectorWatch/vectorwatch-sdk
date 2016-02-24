@@ -207,10 +207,7 @@ VectorWatch.prototype.sendPushPackets = function(packets) {
  * @param cb {Function}
  */
 VectorWatch.prototype.createServer = function(port, cb) {
-    var _this = this;
-    var server = http.createServer(function(req, res) {
-        _this.middleware(req, res);
-    });
+    var server = http.createServer(this.getMiddleware());
 
     server.listen(port, cb);
     return server;
