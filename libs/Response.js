@@ -100,6 +100,8 @@ Response.prototype.send = function() {
         _this.res.write(payload);
         _this.res.end();
         _this.emit('send');
+    }).catch(function(err) {
+        // todo: log this error
     });
 };
 
