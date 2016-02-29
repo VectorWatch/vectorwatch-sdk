@@ -29,12 +29,12 @@ SubscribeToStreamResponse.prototype.setValue = function(value) {
 SubscribeToStreamResponse.prototype.getPayloadAsync = function() {
     return Promise.resolve({
         v: 1,
-        p: {
+        p: [{
             type: 3,
             channelLabel: this.getEvent().getChannelLabel(),
             streamUUID: this.getServer().getOption('streamUID'),
             d: this.value
-        }
+        }]
     });
 };
 
