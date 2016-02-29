@@ -18,6 +18,8 @@ var request = require('request');
 function VectorWatch(options) {
     EventEmitter.call(this);
 
+    this.setMaxListeners(1);
+
     this.options = options || {};
     this.authProvider = null;
     this.storageProvider = null;
@@ -112,17 +114,15 @@ VectorWatch.prototype.getMiddleware = function() {
             var event = Event.fromRequest(_this, req);
             var response = event.createResponse(res);
 
-            if (event.shouldEmit()) {
-                _this.emit(event.getEventName(), event, response);
-            } else {
-                response.send();
-            }
-
             var timeout = setTimeout(function() {
                 res.writeHead(500);
                 res.end();
                 response.setExpired(true);
             }, _this.getOption('eventMaxTimeout', 30000));
+
+            if (!event.emit(response)) {
+                response.send();
+            }
 
             response.on('send', function() {
                 clearTimeout(timeout);

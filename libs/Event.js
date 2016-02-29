@@ -75,13 +75,6 @@ Event.prototype.getUserSettings = function() {
 };
 
 /**
- * @returns {Boolean}
- */
-Event.prototype.shouldEmit = function() {
-    return true;
-};
-
-/**
  * Creates a concrete response based on event type
  * @param res {ServerResponse}
  * @returns {Response}
@@ -98,6 +91,15 @@ Event.prototype.createResponse = function(res) {
  */
 Event.prototype.getResponseClass = function() {
     return require('./Response.js');
+};
+
+/**
+ * Emits this event on the server object
+ * @param response
+ * @returns {Boolean}
+ */
+Event.prototype.emit = function(response) {
+    return this.getServer().emit(this.getEventName(), this, response);
 };
 
 /**

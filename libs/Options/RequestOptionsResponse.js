@@ -37,9 +37,12 @@ RequestOptionsResponse.prototype.addOption = function(name, value) {
  * @inheritdoc
  */
 RequestOptionsResponse.prototype.getPayloadAsync = function() {
-    return Promise.resolve(this.options.map(function(option) {
-        return option.toObject();
-    }));
+    return Promise.resolve({
+        v: 1,
+        p: this.options.map(function (option) {
+            return option.toObject();
+        })
+    });
 };
 
 module.exports = RequestOptionsResponse;

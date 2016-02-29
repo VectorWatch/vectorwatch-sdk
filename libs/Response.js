@@ -14,6 +14,8 @@ function Response(server, res, event) {
     this.sent = false;
     this.expired = false;
     this.event = event;
+
+    /** @type {ServerResponse} */
     this.res = res;
     this.server = server;
 }
@@ -89,15 +91,12 @@ Response.prototype.send = function() {
     var _this = this;
 
     this.getPayloadAsync().then(function(payloadObject) {
-        var payload = JSON.stringify({
-            v: 1,
-            p: payloadObject
-        });
+        var payload = JSON.stringify(payloadObject);
 
         _this.res.writeHead(200, {
             'Content-Type': 'application/json'
         });
-        _this.res.write(payload);
+        _this.res.write(payload || '');
         _this.res.end();
         _this.emit('send');
     }).catch(function(err) {

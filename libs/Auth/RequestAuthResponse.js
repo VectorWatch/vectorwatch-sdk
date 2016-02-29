@@ -23,9 +23,12 @@ RequestAuthResponse.prototype.getPayloadAsync = function() {
 
     return authProvider.getLoginUrlAsync().then(function(loginUrl) {
         return {
-            protocol: authProvider.getProtocol(),
-            version: authProvider.getVersion(),
-            loginUrl: loginUrl
+            v: 1,
+            p: {
+                protocol: authProvider.getProtocol(),
+                version: authProvider.getVersion(),
+                loginUrl: loginUrl
+            }
         };
     });
 };

@@ -13,7 +13,7 @@ util.inherits(RequestAuthEvent, Event);
 /**
  * @inheritdoc
  */
-RequestAuthEvent.prototype.shouldEmit = function() {
+RequestAuthEvent.prototype.emit = function(response) {
     return false;
 };
 

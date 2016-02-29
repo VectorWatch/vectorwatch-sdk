@@ -21,9 +21,12 @@ util.inherits(ApplicationCallResponse, Response);
  * @inheritdoc
  */
 ApplicationCallResponse.prototype.getPayloadAsync = function() {
-    return Promise.resolve(this.packets.map(function(packet) {
-        return packet.toObject();
-    }));
+    return Promise.resolve({
+        version: 1,
+        data: this.packets.map(function (packet) {
+            return packet.toObject();
+        })
+    });
 };
 
 /**

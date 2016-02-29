@@ -49,6 +49,21 @@ ApplicationCallEvent.prototype.getLocation = function() {
 /**
  * @inheritdoc
  */
+ApplicationCallEvent.prototype.emit = function(response) {
+    var eventName = this.getEventName();
+    var methodEventName = [eventName, this.getMethod()].join(':');
+
+    var emitted = this.getServer().emit(methodEventName, this, response);
+    if (!emitted) {
+        return this.getServer().emit(eventName, this, response);
+    }
+
+    return emitted;
+};
+
+/**
+ * @inheritdoc
+ */
 ApplicationCallEvent.prototype.getResponseClass = function() {
     return require('./ApplicationCallResponse.js');
 };

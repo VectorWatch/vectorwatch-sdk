@@ -62,7 +62,10 @@ RequestConfigResponse.prototype.getPayloadAsync = function() {
         }
     }
 
-    return Promise.resolve(payload);
+    return Promise.resolve({
+        v: 1,
+        p: payload
+    });
 };
 
 module.exports = RequestConfigResponse;
