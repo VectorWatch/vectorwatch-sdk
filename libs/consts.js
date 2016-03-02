@@ -37,9 +37,9 @@ var Animations = {
 };
 
 var Buttons = {
-    Top: 'TOP',
+    Up: 'UP',
     Middle: 'MIDDLE',
-    Bottom: 'BOTTOM'
+    Down: 'DOWN'
 };
 
 var ButtonEvents = {
