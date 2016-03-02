@@ -32,6 +32,7 @@ TextElement.prototype.setWatchface = function(watchfaceId) {
 TextElement.prototype.toObject = function() {
     var packet = Packet.prototype.toObject.call(this);
 
+    packet.type = 'text_element';
     packet.elementId = this.elementId;
     packet.value = this.value;
 
