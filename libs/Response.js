@@ -14,6 +14,7 @@ function Response(server, res, event) {
     this.sent = false;
     this.expired = false;
     this.event = event;
+    this.statusCode = 200;
 
     /** @type {ServerResponse} */
     this.res = res;
@@ -93,7 +94,7 @@ Response.prototype.send = function() {
     this.getPayloadAsync().then(function(payloadObject) {
         var payload = JSON.stringify(payloadObject);
 
-        _this.res.writeHead(200, {
+        _this.res.writeHead(_this.statusCode, {
             'Content-Type': 'application/json'
         });
         _this.res.write(payload || '');

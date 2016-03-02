@@ -72,7 +72,13 @@ ApplicationCallResponse.prototype.createChangeWatchfaceCommand = function(watchf
     return packet;
 };
 
-ApplicationCallResponse.prototype.createPopup = function(content, title) {
+/**
+ * Creates a popup and returns it
+ * @param content {String}
+ * @returns {Popup}
+ */
+ApplicationCallResponse.prototype.createPopup = function(content) {
+    this.statusCode = 900;
     this.popup = new Popup(content);
     return this.popup;
 };
