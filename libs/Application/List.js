@@ -58,7 +58,7 @@ List.prototype.createCheckboxItem = function(id, label, checked) {
 /**
  * Creates an action that changes the current watchface when something occurs
  * @param watchfaceId {Number}
- * @returns {ChangeWatchfaceAction}
+ * @returns {RefreshElementAction}
  */
 List.prototype.createChangeWatchfaceAction = function(watchfaceId) {
     return new ChangeWatchfaceAction(watchfaceId);

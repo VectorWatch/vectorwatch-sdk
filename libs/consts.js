@@ -16,7 +16,8 @@ var Actions = {
     ChangeToNextWatchface: 'CHANGE_TO_NEXT_WATCHFACE',
     ChangeToPreviousWatchface: 'CHANGE_TO_PREVIOUS_WATCHFACE',
     ChangeWatchface: 'CHANGE_WATCHFACE',
-    SendValueToCloud: 'SEND_VALUE_TO_CLOUD'
+    SendValueToCloud: 'SEND_VALUE_TO_CLOUD',
+    RefreshElement: 'REFRESH_ELEMENT'
 };
 
 /**
@@ -35,8 +36,21 @@ var Animations = {
     RightOut: 'RIGHT_OUT'
 };
 
+var Buttons = {
+    Top: 'TOP',
+    Middle: 'MIDDLE',
+    Bottom: 'BOTTOM'
+};
+
+var ButtonEvents = {
+    StartPress: 'START_PRESS',
+    Press: 'PRESS'
+};
+
 module.exports = {
     TTL: TTL,
     Actions: Actions,
-    Animations: Animations
+    Animations: Animations,
+    Buttons: Buttons,
+    ButtonEvents: ButtonEvents
 };

@@ -6,6 +6,8 @@ var TextElement = require('./TextElement.js');
 var List = require('./List.js');
 var ChangeWatchfaceCommand = require('./ChangeWatchfaceCommand.js');
 
+var Popup = require('./Popup.js');
+
 /**
  * @constructor
  * @augments Response
@@ -14,6 +16,7 @@ function ApplicationCallResponse() {
     Response.apply(this, arguments);
 
     this.packets = [];
+    this.popup = null;
 }
 util.inherits(ApplicationCallResponse, Response);
 
@@ -61,6 +64,12 @@ ApplicationCallResponse.prototype.createChangeWatchfaceCommand = function(watchf
     var packet = new ChangeWatchfaceCommand(watchfaceId);
     this.packets.push(packet);
     return packet;
+};
+
+ApplicationCallResponse.prototype.createPopup = function(content) {
+    this.popup = new Popup();
+    this.popup.setContent(content);
+    return this.popup;
 };
 
 module.exports = ApplicationCallResponse;

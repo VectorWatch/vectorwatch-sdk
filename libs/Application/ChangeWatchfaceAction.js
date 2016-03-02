@@ -20,7 +20,7 @@ util.inherits(ChangeWatchfaceAction, Action);
 /**
  * Sets the animation type
  * @param animation {Animations}
- * @returns {ChangeWatchfaceAction}
+ * @returns {RefreshElementAction}
  */
 ChangeWatchfaceAction.prototype.setAnimation = function(animation) {
     if (!consts.Animations[animation]) {
@@ -34,7 +34,7 @@ ChangeWatchfaceAction.prototype.setAnimation = function(animation) {
 /**
  * Sets the watch to vibrate when changing the watchface
  * @param [alert] {Boolean}
- * @returns {ChangeWatchfaceAction}
+ * @returns {RefreshElementAction}
  */
 ChangeWatchfaceAction.prototype.setAlert = function(alert) {
     if (alert == null) {

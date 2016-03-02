@@ -216,5 +216,7 @@ VectorWatch.prototype.createServer = function(port, cb) {
 VectorWatch.TTL = consts.TTL;
 VectorWatch.Actions = consts.Actions;
 VectorWatch.Animations = consts.Animations;
+VectorWatch.Buttons = consts.Buttons;
+VectorWatch.ButtonEvents = consts.ButtonEvents;
 
 module.exports = VectorWatch;
