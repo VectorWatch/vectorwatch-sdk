@@ -70,6 +70,7 @@ List.prototype.createChangeWatchfaceAction = function(watchfaceId) {
 List.prototype.toObject = function() {
     var packet = Packet.prototype.toObject.call(this);
 
+    packet.type = 'list';
     if (this.elementId) {
         packet.elementId = this.elementId;
     }
