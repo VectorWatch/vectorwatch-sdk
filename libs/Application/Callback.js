@@ -50,7 +50,7 @@ Callback.prototype.toObject = function() {
     };
 
     if (this.action) {
-        callback.action = this.action.toObject();
+        callback.action = this.action.toPopupObject();
     }
 
     return callback;

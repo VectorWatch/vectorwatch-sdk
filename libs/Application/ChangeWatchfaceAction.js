@@ -63,4 +63,22 @@ ChangeWatchfaceAction.prototype.toObject = function() {
     return action;
 };
 
+/**
+ * @inheritdoc
+ */
+ChangeWatchfaceAction.prototype.toPopupObject = function() {
+    var action = Action.prototype.toPopupObject.call(this);
+    action.target = this.watchfaceId;
+
+    if (this.animation) {
+        action.animation = this.animation;
+    }
+
+    if (this.alert) {
+        action.alert = true;
+    }
+
+    return action;
+};
+
 module.exports = ChangeWatchfaceAction;

@@ -18,4 +18,14 @@ Action.prototype.toObject = function() {
     };
 };
 
+/**
+ * Returns a serialized object of this action for popups
+ * @returns {Object}
+ */
+Action.prototype.toPopupObject = function() {
+    return {
+        watchButtonAction: this.action
+    };
+};
+
 module.exports = Action;
