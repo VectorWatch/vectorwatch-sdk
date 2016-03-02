@@ -74,7 +74,7 @@ List.prototype.toObject = function() {
         packet.elementId = this.elementId;
     }
 
-    packet.data = this.items.map(function(item) {
+    packet.items = this.items.map(function(item) {
         return item.toObject();
     });
 
