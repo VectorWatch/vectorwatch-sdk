@@ -7,6 +7,7 @@ var Callback = require('./Callback.js');
  * @constructor
  */
 function Popup(content) {
+    this.title = '';
     this.content = content;
     this.label = '';
     this.callbacks = [];
@@ -20,6 +21,16 @@ function Popup(content) {
  */
 Popup.prototype.setLabel = function(label) {
     this.label = label;
+    return this;
+};
+
+/**
+ * Sets the title
+ * @param title {String}
+ * @returns {Popup}
+ */
+Popup.prototype.setTitle = function(title) {
+    this.title = title;
     return this;
 };
 
@@ -73,6 +84,7 @@ Popup.prototype.addCallback = function(button, event, action) {
  */
 Popup.prototype.toObject = function() {
     return {
+        title: this.title,
         content: this.content,
         label: this.label,
         displayTime: this.displayTime,

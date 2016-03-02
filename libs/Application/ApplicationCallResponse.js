@@ -72,7 +72,7 @@ ApplicationCallResponse.prototype.createChangeWatchfaceCommand = function(watchf
     return packet;
 };
 
-ApplicationCallResponse.prototype.createPopup = function(content) {
+ApplicationCallResponse.prototype.createPopup = function(content, title) {
     this.popup = new Popup(content);
     return this.popup;
 };
