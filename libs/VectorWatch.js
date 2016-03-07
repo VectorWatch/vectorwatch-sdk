@@ -9,6 +9,7 @@ var PushBuffer = require('./PushBuffer.js');
 var StreamPushPacket = require('./Stream/StreamPushPacket.js');
 var InvalidAuthTokensPushPacket = require('./Auth/InvalidAuthTokensPushPacket.js');
 var request = require('request');
+var Logger = require('./Logging/Logger.js');
 
 /**
  * @param [options] {Object}
@@ -29,6 +30,9 @@ function VectorWatch(options) {
     this.pushBuffer.on('flush', function(packets) {
         _this.sendPushPackets(packets);
     });
+    //use elasticsearch logger by default
+    this.logger = new Logger(this.options, this.getElasticSearchUrl());
+
 }
 util.inherits(VectorWatch, EventEmitter);
 
@@ -168,6 +172,25 @@ VectorWatch.prototype.getPushUrl = function() {
 
     return 'http://52.16.43.57:8080/VectorCloud/rest/v1/stream/push';
 };
+
+
+/**
+ * Returns elasticsearch url based on environment
+ * @returns {String}
+ */
+VectorWatch.prototype.getElasticSearchUrl = function() {
+    if (this.getOption('production')) {
+        if (process.env.ELASTICSEARCH_SRV && process.env.ELASTICSEARCH_PORT) {
+            return process.env.ELASTICSEARCH_SRV + ":" + process.env.ELASTICSEARCH_PORT;
+        } else {
+            return 'http://localhost:9200';
+        }
+    } else {
+        return "";
+    }
+
+};
+
 
 /**
  * Sends the push packets
