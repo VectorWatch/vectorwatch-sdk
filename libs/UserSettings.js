@@ -35,7 +35,7 @@ UserSettings.fromUserSettingsObject = function(object) {
 
     var userSettings = new UserSettings();
     for (var settingName in object) {
-        userSettings.settings[settingName] = object[settingName].value;
+        userSettings.settings[settingName] = object[settingName];
     }
 
     return userSettings;
