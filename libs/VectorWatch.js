@@ -158,15 +158,39 @@ VectorWatch.prototype.pushInvalidAuthTokens = function(channelLabel) {
 };
 
 /**
- * Returns the push url based on environment
+ * Creates a Invalid AuthTokens push packet and sends it immediately
+ * @param channelLabel {String}
+ */
+VectorWatch.prototype.pushInvalidAuthTokensForApp = function(userKey) {
+    var packet = new InvalidAuthTokensPushPacket(this)
+        .setUserKey(userKey);
+
+    this.pushBuffer.add(packet);
+    this.pushBuffer.flush();
+};
+
+/**
+ * Returns the stream push url based on environment
  * @returns {String}
  */
-VectorWatch.prototype.getPushUrl = function() {
+VectorWatch.prototype.getStreamPushUrl = function() {
     if (this.getOption('production')) {
         return 'http://52.16.43.57:8080/VectorCloud/rest/v1/stream/push';
     }
 
     return 'http://52.16.43.57:8080/VectorCloud/rest/v1/stream/push';
+};
+
+/**
+ * Returns the app push url based on environment
+ * @returns {String}
+ */
+VectorWatch.prototype.getAppPushUrl = function() {
+    if (this.getOption('production')) {
+        return 'http://52.16.43.57:8080/VectorCloud/rest/v1/app/push';
+    }
+
+    return 'http://52.16.43.57:8080/VectorCloud/rest/v1/app/push';
 };
 
 /**
@@ -178,27 +202,44 @@ VectorWatch.prototype.sendPushPackets = function(packets) {
         return this.pushBuffer.flush();
     }
 
-    var options = {
-        uri: this.getPushUrl(),
-        method: 'POST',
-        json: packets.map(function(packet) {
-            return packet.toObject();
-        }),
-        headers: { Authorization: this.getOption('token') }
-    };
+    var streamPackets = packets.filter(function(packet) {
+        return packet.isStreamPacket();
+    });
 
-    request(options, function (err, response, body) {
-        if (err) {
-            // log this error
+    var appPackets = packets.filter(function(packet) {
+        return packet.isAppPacket();
+    });
+
+    var send = function(packets, pushUrl) {
+        if (!packets.length) {
             return;
         }
 
-        if (response.statusCode != 200) {
-            // log body
-        }
+        var options = {
+            uri: pushUrl,
+            method: 'POST',
+            json: packets.map(function(packet) {
+                return packet.toObject();
+            }),
+            headers: { Authorization: this.getOption('token') }
+        };
 
-        // success
-    });
+        request(options, function (err, response, body) {
+            if (err) {
+                // log this error
+                return;
+            }
+
+            if (response.statusCode != 200) {
+                // log body
+            }
+
+            // success
+        });
+    };
+
+    send(streamPackets, this.getStreamPushUrl());
+    send(appPackets, this.getAppPushUrl());
 };
 
 /**

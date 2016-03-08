@@ -9,6 +9,35 @@ function ApplicationCallEvent() {
     Event.apply(this, arguments);
 
     this.eventName = 'call';
+
+    var _this = this;
+
+    var authProvider = this.getServer().getAuthProvider();
+    var storageProvider = this.getServer().getStorageProvider();
+
+    var credentialsKey = null;
+    if (authProvider) {
+        credentialsKey = authProvider.getCredentialsKey(this.getAuthCredentials());
+    }
+
+    this.authTokensPromise = new Promise(function(resolve, reject) {
+        Event.prototype.getAuthTokensAsync.call(_this).then(function(authTokens) {
+            resolve(authTokens);
+
+            storageProvider.storeAppSettingsAsync(
+                _this.getUserKey(),
+                _this.getUserSettings().toObject(),
+                credentialsKey,
+                _this.getServer().getOption('appPushTTL', 300)
+            ).then(function() {
+                // do nothing here
+            }).catch(function(err) {
+                // todo: log this error
+            });
+        }).catch(function(err) {
+            reject(err);
+        });
+    });
 }
 util.inherits(ApplicationCallEvent, Event);
 
@@ -20,6 +49,10 @@ ApplicationCallEvent.prototype.getMethod = function() {
     return this.req.body.method;
 };
 
+ApplicationCallEvent.prototype.getAuthTokensAsync = function() {
+    return this.authTokensPromise;
+};
+
 /**
  * Returns the argument passed along with the method call
  * @param argName {String}
@@ -28,6 +61,14 @@ ApplicationCallEvent.prototype.getMethod = function() {
 ApplicationCallEvent.prototype.getArgument = function(argName) {
     var args = this.getArguments();
     return args[argName];
+};
+
+/**
+ * Returns the userKey
+ * @returns {String}
+ */
+ApplicationCallEvent.prototype.getUserKey = function() {
+    return this.req.userKey;
 };
 
 /**
