@@ -101,7 +101,7 @@ Response.prototype.send = function() {
         _this.res.end();
         _this.emit('send');
     }).catch(function(err) {
-        // todo: log this error
+        console.log("Uncaught exception: " + JSON.stringify(err.message || err) + "\n" + err.stack);
     });
 };
 

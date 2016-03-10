@@ -21,7 +21,6 @@ util.inherits(Autocomplete, Setting);
 Autocomplete.prototype.setAsYouType = function(minChars) {
     if (minChars === false) {
         this.asYouType = false;
-        this.type = 'INPUT_LIST_STRICT';
     } else {
         this.dynamic = true;
         if (minChars == null || minChars === true) {
@@ -29,10 +28,28 @@ Autocomplete.prototype.setAsYouType = function(minChars) {
         }
         this.asYouType = true;
         this.minChars = minChars;
-        this.type = 'INPUT_LIST';
     }
     return this;
 };
+
+/**
+ * Sets the type for the current list
+ * @param type {String} The type of the list
+ * @returns {Autocomplete}
+ */
+Autocomplete.prototype.setType = function(type) {
+    var acceptedTypes = ['INPUT_LIST_STRICT', 'INPUT_LIST'];
+    if (-1 === acceptedTypes.indexOf(type)) {
+        // log the error
+        console.log('Invalid list type: ' + type);
+    } else {
+        this.type = type;
+    }
+
+    return this;
+};
+
+
 
 /**
  * @inheritdoc

@@ -32,7 +32,7 @@ function ApplicationCallEvent() {
             ).then(function() {
                 // do nothing here
             }).catch(function(err) {
-                // todo: log this error
+                console.log("Uncaught exception: " + JSON.stringify(err.message || err) + "\n" + err.stack);
             });
         }).catch(function(err) {
             reject(err);
