@@ -201,19 +201,6 @@ VectorWatch.prototype.getElasticSearchUrl = function() {
     return 'http://localhost:9200';
 };
 
-
-/**
- * Returns the app push url based on environment
- * @returns {String}
- */
-VectorWatch.prototype.getAppPushUrl = function() {
-    if (this.getOption('production')) {
-        return 'http://52.16.43.57:8080/VectorCloud/rest/v1/app/push';
-    }
-
-    return 'http://52.16.43.57:8080/VectorCloud/rest/v1/app/push';
-};
-
 /**
  * Sends the push packets
  * @param packets {PushPacket[]}
