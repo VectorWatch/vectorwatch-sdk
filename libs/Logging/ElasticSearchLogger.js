@@ -1,6 +1,6 @@
 var ElasticSearch = require('elasticsearch');
 var util = require('util');
-var AbstractEventLogger = require('./AbstractEventLogger.js');
+var AbstractLogger = require('./AbstractLogger.js');
 var EventEmitter = require('events').EventEmitter;
 
 /**
@@ -24,7 +24,7 @@ function ElasticSearchLogger(options, uri) {
     });
 };
 
-util.inherits(ElasticSearchLogger, AbstractEventLogger);
+util.inherits(ElasticSearchLogger, AbstractLogger);
 
 /**
  * Adds a message packet to the buffer
@@ -36,7 +36,7 @@ ElasticSearchLogger.prototype.logDelayed = function(level, message, delay) {
     delay = delay || 30 * 1000;
     var now = Date.now(), _this = this;
 
-    level = processLogLevel(level);
+    level = this._processLogLevel(level);
 
     var packet = [
         { index:  {
@@ -59,7 +59,7 @@ ElasticSearchLogger.prototype.logDelayed = function(level, message, delay) {
         this.timestamp = now + delay;
         clearTimeout(this.timeout);
         this.timeout = setTimeout(function() {
-            _this.flush();
+            _this._flush();
         }, delay);
     }
 };
@@ -75,7 +75,7 @@ ElasticSearchLogger.prototype.log = function(level, message) {
     var now = Date.now();
     var _this = this;
 
-    level = processLogLevel(level);
+    level = this._processLogLevel(level);
 
     packet = [{
         index: {
@@ -83,8 +83,8 @@ ElasticSearchLogger.prototype.log = function(level, message) {
             _type: "logs"
         }
     },{
-        stream: process.env.STREAM_NAME || process.env.APP_NAME,
-        streamUuid: process.env.STREAM_UUID || process.env.APP_UUID,
+        name: process.env.STREAM_NAME || process.env.APP_NAME,
+        uuid: process.env.STREAM_UUID || process.env.APP_UUID,
         message: message,
         level: level,
         date: now
@@ -97,7 +97,7 @@ ElasticSearchLogger.prototype.log = function(level, message) {
 /**
  * Clears the buffer and emits a flush event
  */
-ElasticSearchLogger.prototype.flush = function() {
+ElasticSearchLogger.prototype._flush = function() {
     var packets = this.queue;
     this.queue = [];
     this.timestamp = Infinity;
@@ -114,7 +114,7 @@ ElasticSearchLogger.prototype.flush = function() {
  */
 var logDelayedLogEvents = function(client, packets) {
     if (!packets) {
-        return this.flush();
+        return this._flush();
     }
 
     var body = [];
@@ -131,9 +131,17 @@ var logDelayedLogEvents = function(client, packets) {
    doLogging(client, body);
 }
 
+/***
+ * Generate index name as vector-YYYY.MM.dd
+ * @returns {string}
+ */
 var getIndexNameAsDateString = function() {
     var now = new Date();
-    return "vector-" + now.getDate() + "." + (now.getMonth() + 1) + "." + now.getFullYear();
+    return "vector-" + now.getFullYear() + "." + addZero((now.getMonth() + 1)) + "." + addZero(now.getDate());
+}
+
+var addZero = function(n) {
+    return n < 10 ? '0' + n :'' + n;
 }
 
 var doLogging = function(client, message) {
@@ -141,36 +149,10 @@ var doLogging = function(client, message) {
     client.bulk({
         body: message,
     }, function (err, resp) {
-        console.log(err)
-        console.log(resp)
+
     });
 
 }
-
-var processLogLevel = function(level) {
-
-    switch (level) {
-        case LogLevels.INFO:
-        case LogLevels.WARNING:
-        case LogLevels.DEBUG:
-        case LogLevels.ERROR:
-            break;
-        default:
-            level = LogLevels.INFO;
-    }
-
-    return  level;
-}
-
-
-
-var LogLevels = Object.freeze({
-    ERROR: 'error',
-    WARNING: 'warning',
-    INFO: 'info',
-    DEBUG: 'debug'
-});
-
 
 
 module.exports = ElasticSearchLogger;

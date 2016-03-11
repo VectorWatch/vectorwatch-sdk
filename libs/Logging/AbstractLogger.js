@@ -1,7 +1,8 @@
 /**
  * Created by robert on 11.03.2016.
  */
-
+var EventEmitter = require('events').EventEmitter;
+var util = require('util');
 
 
 /**
@@ -9,13 +10,14 @@
  */
 function AbstractLogger() { };
 
+util.inherits(AbstractLogger, EventEmitter);
 
 /***
  * Log message
  * @param level
- * @param message
- */
-AbstractLogger.prototype.log = function(level, message) { };
+ * @param messageg
+ * */
+ AbstractLogger.prototype.log = function(level, message) { };
 
 
 /***
@@ -24,7 +26,6 @@ AbstractLogger.prototype.log = function(level, message) { };
  * @param message
  */
 AbstractLogger.prototype.logDelayed = function(level, message, delay) { };
-
 
 
 AbstractLogger.prototype._processLogLevel = function(level) {
@@ -50,6 +51,5 @@ AbstractLogger.prototype._LogLevels = Object.freeze({
     INFO: 'info',
     DEBUG: 'debug'
 });
-
 
 module.exports = AbstractLogger;
