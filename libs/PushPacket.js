@@ -15,14 +15,33 @@ PushPacket.prototype.getServer = function() {
 };
 
 /**
+ * @returns {Boolean}
+ */
+PushPacket.prototype.isStreamPacket = function() { return false; };
+
+/**
+ * @returns {Boolean}
+ */
+PushPacket.prototype.isAppPacket = function() { return false; };
+
+/**
  * Returns a serialized object of the push packet
  * @returns {Object}
  */
 PushPacket.prototype.toObject = function() {
-    return {
-        type: this.type,
-        streamUUID: this.getServer().getOption('streamUID')
+    var packet = {
+        type: this.type
     };
+
+    if (this.isStreamPacket()) {
+        packet.streamUUID = this.getServer().getOption('streamUID');
+    }
+
+    if (this.isAppPacket()) {
+        packet.appUuid = this.getServer().getOption('appUID');
+    }
+
+    return packet;
 };
 
 module.exports = PushPacket;

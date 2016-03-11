@@ -37,6 +37,13 @@ StreamPushPacket.prototype.setChannelLabel = function(channelLabel) {
 /**
  * @inheritdoc
  */
+StreamPushPacket.prototype.isStreamPacket = function() {
+    return true;
+};
+
+/**
+ * @inheritdoc
+ */
 StreamPushPacket.prototype.toObject = function() {
     var packet = PushPacket.prototype.toObject.call(this);
     packet.channelLabel = this.channelLabel;
