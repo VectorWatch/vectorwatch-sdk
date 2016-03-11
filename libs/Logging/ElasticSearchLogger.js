@@ -1,27 +1,30 @@
-var EventEmitter = require('events').EventEmitter;
 var ElasticSearch = require('elasticsearch');
 var util = require('util');
+var AbstractEventLogger = require('./AbstractEventLogger.js');
+var EventEmitter = require('events').EventEmitter;
 
 /**
+ * constructor
+ * @param options
+ * @param uri
  * @constructor
- * @augments EventEmitter
  */
-function Logger(options, uri) {
+function ElasticSearchLogger(options, uri) {
     EventEmitter.call(this);
 
     this.queue = [];
     this.timeout = null;
     this.timestamp = Infinity;
     this.options = options;
-    console.log(uri)
-    this.client = (uri !== "") ? new ElasticSearch .Client({ host: uri }) : null;
+
+    this.client = new ElasticSearch .Client({ host: uri });
     var _this = this;
     this.on('flush', function(packets) {
         logDelayedLogEvents(_this.client, packets);
     });
 };
 
-util.inherits(Logger, EventEmitter);
+util.inherits(ElasticSearchLogger, AbstractEventLogger);
 
 /**
  * Adds a message packet to the buffer
@@ -29,7 +32,7 @@ util.inherits(Logger, EventEmitter);
  * @param message
  * @param delay
  */
-Logger.prototype.logDelayed = function(level, message, delay) {
+ElasticSearchLogger.prototype.logDelayed = function(level, message, delay) {
     delay = delay || 30 * 1000;
     var now = Date.now(), _this = this;
 
@@ -42,8 +45,8 @@ Logger.prototype.logDelayed = function(level, message, delay) {
         }
         },
         {
-            stream: process.env.STREAM_NAME || process.env.APP_NAME,
-            streamUuid: process.env.STREAM_UUID || process.env.APP_UUID,
+            name: process.env.STREAM_NAME || process.env.APP_NAME,
+            uuid: process.env.STREAM_UUID || process.env.APP_UUID,
             message: message,
             level: level,
             date: now
@@ -67,28 +70,26 @@ Logger.prototype.logDelayed = function(level, message, delay) {
  * @param level
  * @param message
  */
-Logger.prototype.log = function(level, message) {
+ElasticSearchLogger.prototype.log = function(level, message) {
 
-    var now = Date.now(), _this = this;
+    var now = Date.now();
+    var _this = this;
 
     level = processLogLevel(level);
 
-    var packet = message;
+    packet = [{
+        index: {
+            _index: getIndexNameAsDateString(),
+            _type: "logs"
+        }
+    },{
+        stream: process.env.STREAM_NAME || process.env.APP_NAME,
+        streamUuid: process.env.STREAM_UUID || process.env.APP_UUID,
+        message: message,
+        level: level,
+        date: now
+    }];
 
-    if (this.client !== null) {
-        packet = [{
-            index: {
-                _index: getIndexNameAsDateString(),
-                _type: "logs"
-            }
-        },{
-            stream: process.env.STREAM_NAME || process.env.APP_NAME,
-            streamUuid: process.env.STREAM_UUID || process.env.APP_UUID,
-            message: message,
-            level: level,
-            date: now
-        }];
-    }
 
     doLogging(this.client, packet);
 };
@@ -96,7 +97,7 @@ Logger.prototype.log = function(level, message) {
 /**
  * Clears the buffer and emits a flush event
  */
-Logger.prototype.flush = function() {
+ElasticSearchLogger.prototype.flush = function() {
     var packets = this.queue;
     this.queue = [];
     this.timestamp = Infinity;
@@ -117,25 +118,15 @@ var logDelayedLogEvents = function(client, packets) {
     }
 
     var body = [];
-    if (client !== null) {
-        packets.forEach(function (packet) {
-            if (packet instanceof Array && packet.length > 0) {
-                body.push(packet[0]);
-                body.push(packet[1]);
-            } else {
-                body.push(packet);
-            }
-        });
-    } else {
-        packets.forEach(function (packet) {
 
-            if (packet instanceof Array && packet.length > 0) {
-                body += packet[1].message + '\n';
-            } else {
-                body += packet + + '\n';
-            }
-        });
-    }
+    packets.forEach(function (packet) {
+        if (packet instanceof Array && packet.length > 0) {
+            body.push(packet[0]);
+            body.push(packet[1]);
+        } else {
+            body.push(packet);
+        }
+    });
 
    doLogging(client, body);
 }
@@ -146,17 +137,14 @@ var getIndexNameAsDateString = function() {
 }
 
 var doLogging = function(client, message) {
-    if (client === null) {
-        console.log(message);
-    } else {
 
-        client.bulk({
-            body: message,
-        }, function (err, resp) {
-            console.log(err)
-            console.log(resp)
-        });
-    }
+    client.bulk({
+        body: message,
+    }, function (err, resp) {
+        console.log(err)
+        console.log(resp)
+    });
+
 }
 
 var processLogLevel = function(level) {
@@ -185,4 +173,4 @@ var LogLevels = Object.freeze({
 
 
 
-module.exports = Logger;
+module.exports = ElasticSearchLogger;
