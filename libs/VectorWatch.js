@@ -9,7 +9,8 @@ var PushBuffer = require('./PushBuffer.js');
 var StreamPushPacket = require('./Stream/StreamPushPacket.js');
 var InvalidAuthTokensPushPacket = require('./Auth/InvalidAuthTokensPushPacket.js');
 var request = require('request');
-
+var ElasticSearchLogger = require('./Logging/ElasticSearchLogger.js');
+var ConsoleLogger = require('./Logging/ConsoleLogger.js');
 /**
  * @param [options] {Object}
  * @constructor
@@ -29,6 +30,14 @@ function VectorWatch(options) {
     this.pushBuffer.on('flush', function(packets) {
         _this.sendPushPackets(packets);
     });
+
+    if (options.production || options.logger === 'elastic') {
+        this.logger = new ElasticSearchLogger(this.options, this.getElasticSearchUrl());
+    } else {
+        this.logger = new ConsoleLogger();
+    }
+
+
 }
 util.inherits(VectorWatch, EventEmitter);
 
@@ -174,11 +183,33 @@ VectorWatch.prototype.pushInvalidAuthTokensForApp = function(userKey) {
  * @returns {String}
  */
 VectorWatch.prototype.getStreamPushUrl = function() {
-    if (this.getOption('production')) {
-        return 'http://52.16.43.57:8080/VectorCloud/rest/v1/stream/push';
+    if (process.env.PUSH_URL) {
+        return process.env.PUSH_URL;
     }
+    return 'http://localhost:8080/VectorCloud/rest/v1/stream/push';
+};
 
-    return 'http://52.16.43.57:8080/VectorCloud/rest/v1/stream/push';
+
+/**
+ * Returns elasticsearch url based on environment
+ * @returns {String}
+ */
+VectorWatch.prototype.getElasticSearchUrl = function() {
+    if (process.env.ELASTICSEARCH_URL) {
+        return process.env.ELASTICSEARCH_URL;
+    }
+    return 'http://localhost:9200';
+};
+
+/**
+ * Returns the app push url based on environment
+ * @returns {String}
+ */
+VectorWatch.prototype.getAppPushUrl = function() {
+    if (process.env.PUSH_URL) {
+        return process.env.PUSH_URL;
+    }
+    return 'http://localhost:8080/VectorCloud/rest/v1/app/push';
 };
 
 /**
