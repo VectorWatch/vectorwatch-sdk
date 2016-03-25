@@ -5,6 +5,7 @@ var _dirname = require('path').dirname
 var FluentLogger = require('fluent-logger')
 var URL = require('url')
 var LogUtils = require('./LogUtils.js');
+var common = require('winston/lib/winston/common');
 
 
 var FluentTransport = function (options) {
@@ -78,7 +79,10 @@ FluentTransport.prototype.log = function (level, msg, meta, callback) {
         }
     }
     message._index = LogUtils.getIndexNameAsDateString();
-    console.log(message);
+    //catch json parse errors on request
+    if (meta.body && meta.status) {
+        message.stack = common.log({ meta: meta});
+    }
 
     this.logger.emit('logs', message, message.unix, callback);
 }
