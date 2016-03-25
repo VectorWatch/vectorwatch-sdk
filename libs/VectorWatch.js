@@ -9,8 +9,11 @@ var PushBuffer = require('./PushBuffer.js');
 var StreamPushPacket = require('./Stream/StreamPushPacket.js');
 var InvalidAuthTokensPushPacket = require('./Auth/InvalidAuthTokensPushPacket.js');
 var request = require('request');
-var ElasticSearchLogger = require('./Logging/ElasticSearchLogger.js');
 var ConsoleLogger = require('./Logging/ConsoleLogger.js');
+var winston = require('winston');
+var ElasticSearchTransport = require('./Logging/ElasticSearchTransport');
+var FluentTransport = require('./Logging/FluentTransport');
+
 /**
  * @param [options] {Object}
  * @constructor
@@ -31,13 +34,7 @@ function VectorWatch(options) {
         _this.sendPushPackets(packets);
     });
 
-    if (options.production || options.logger === 'elastic') {
-        this.logger = new ElasticSearchLogger(this.options, this.getElasticSearchUrl());
-    } else {
-        this.logger = new ConsoleLogger();
-    }
-
-
+    this.logger = this._decideLogger(options);
 }
 util.inherits(VectorWatch, EventEmitter);
 
@@ -103,6 +100,7 @@ VectorWatch.prototype.getMiddleware = function() {
 
         if (!next) {
             next = function(err) {
+                _this.logger.error(err, { code: err ? 500 : 404 });
                 res.writeHead(err ? 500 : 404);
                 res.end();
             };
@@ -114,7 +112,10 @@ VectorWatch.prototype.getMiddleware = function() {
 
         // make sure body is parsed at this moment
         parseBody(req, res, function(err) {
-            if (err) return next(err);
+            if (err) {
+                _this.logger.error(err);
+                return next(err);
+            }
 
             if (!req.body.eventType) {
                 return next();
@@ -124,6 +125,7 @@ VectorWatch.prototype.getMiddleware = function() {
             var response = event.createResponse(res);
 
             var timeout = setTimeout(function() {
+                _this.logger.error("Server timeout reached", { code: 500 });
                 res.writeHead(500);
                 res.end();
                 response.setExpired(true);
@@ -202,6 +204,17 @@ VectorWatch.prototype.getElasticSearchUrl = function() {
 };
 
 /**
+ * Returns fluentd url based on environment
+ * @returns {String}
+ */
+VectorWatch.prototype.getFluentdUrl = function() {
+    if (process.env.FLUENTD_URL) {
+        return process.env.FLUENTD_URL;
+    }
+    return 'http://localhost:24224';
+};
+
+/**
  * Returns the app push url based on environment
  * @returns {String}
  */
@@ -212,17 +225,6 @@ VectorWatch.prototype.getAppPushUrl = function() {
     return 'http://localhost:8080/VectorCloud/rest/v1/app/push';
 };
 
-/**
- * Returns the app push url based on environment
- * @returns {String}
- */
-VectorWatch.prototype.getAppPushUrl = function() {
-    if (this.getOption('production')) {
-        return 'http://52.16.43.57:8080/VectorCloud/rest/v1/app/push';
-    }
-
-    return 'http://52.16.43.57:8080/VectorCloud/rest/v1/app/push';
-};
 
 /**
  * Sends the push packets
@@ -271,6 +273,54 @@ VectorWatch.prototype.sendPushPackets = function(packets) {
 
     send(streamPackets, this.getStreamPushUrl());
     send(appPackets, this.getAppPushUrl());
+};
+
+
+/***
+ * Decide which logger to use
+ * @returns {winston.Logger}
+ * @private
+ */
+VectorWatch.prototype._decideLogger = function() {
+    if (this.options.production && process.env.ELASTICSEARCH_URL) {
+        return new (winston.Logger)({
+            transports: [
+                new ElasticSearchTransport({
+                    level: 'info',
+                    handleExceptions: true,
+                    json: true,
+                    colorize: true,
+                    timestamp: true,
+                    url: this.getElasticSearchUrl()
+                })
+            ]
+        });
+    } else if (this.options.production && process.env.FLUENTD_URL) {
+        return new (winston.Logger)({
+            transports: [
+                new FluentTransport({
+                    level: 'info',
+                    handleExceptions: true,
+                    json: true,
+                    colorize: true,
+                    timestamp: true,
+                    url: this.getFluentdUrl()
+                })
+            ]
+        });
+    } else {
+        return new (winston.Logger)({
+            transports: [
+                new (winston.transports.Console)({
+                    level: 'info',
+                    handleExceptions: true,
+                    json: true,
+                    colorize: true,
+                    timestamp: true,
+                })
+            ]
+        });
+    }
 };
 
 /**
