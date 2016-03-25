@@ -57,6 +57,7 @@ Response.prototype.sendBadRequestError = function(message) {
     this.res.write(payload);
     this.res.end();
     this.emit('send');
+    _this.server.logger.warn("sentBadRequestError " + message, { code: 400 });
 };
 
 /**
@@ -78,6 +79,7 @@ Response.prototype.sendInvalidAuthTokens = function() {
     this.res.write(payload);
     this.res.end();
     this.emit('send');
+    _this.server.logger.warn("sendInvalidAuthTokens ", { code: 901 });
 };
 
 /**
@@ -101,7 +103,7 @@ Response.prototype.send = function() {
         _this.res.end();
         _this.emit('send');
     }).catch(function(err) {
-        // todo: log this error
+        _this.server.logger.error( err );
     });
 };
 
