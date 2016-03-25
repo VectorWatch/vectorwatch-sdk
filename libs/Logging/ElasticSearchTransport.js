@@ -2,7 +2,8 @@ var util = require('util')
 var winston = require('winston')
 var Transport = winston.Transport
 var _dirname = require('path').dirname
-var ElasticSearchLogger = require('./ElasticSearchLogger.js')
+var ElasticSearchLogger = require('./ElasticSearchLogger.js');
+var common = require('winston/lib/winston/common');
 
 var ElasticSearchTransport = function (options) {
     Transport.call(this, options);
@@ -63,7 +64,10 @@ ElasticSearchTransport.prototype.log = function (level, msg, meta, callback) {
             }
         }
     }
-
+    //catch json parse errors on request
+    if (meta.body && meta.status) {
+        message.stack = common.log({ meta: meta});
+    }
     this.logger.log(level, message);
 
     callback;
