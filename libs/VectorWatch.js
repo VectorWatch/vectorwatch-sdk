@@ -12,7 +12,7 @@ var request = require('request');
 var ConsoleLogger = require('./Logging/ConsoleLogger.js');
 var winston = require('winston');
 var ElasticSearchTransport = require('./Logging/ElasticSearchTransport');
-var FluentTransport = require('./Logging/FluentTransport');
+var GraylogTransport = require('./Logging/GraylogTransport');
 
 /**
  * @param [options] {Object}
@@ -35,8 +35,13 @@ function VectorWatch(options) {
     });
 
     this.logger = this._decideLogger(options);
+
 }
+
+
+
 util.inherits(VectorWatch, EventEmitter);
+
 
 /**
  * Returns the auth provider used for authenticating the user on external services
@@ -95,6 +100,7 @@ VectorWatch.prototype.getOption = function(optionName, defaultValue) {
  * @returns {Function}
  */
 VectorWatch.prototype.getMiddleware = function() {
+
     var _this = this;
     return function(req, res, next) {
 
@@ -204,14 +210,15 @@ VectorWatch.prototype.getElasticSearchUrl = function() {
 };
 
 /**
- * Returns fluentd url based on environment
+ * Returns graylog url based on environment
  * @returns {String}
  */
-VectorWatch.prototype.getFluentdUrl = function() {
-    if (process.env.FLUENTD_URL) {
-        return process.env.FLUENTD_URL;
+VectorWatch.prototype.getGraylogUrl = function() {
+    if (process.env.GRAYLOG_URL) {
+        console.log(process.env.GRAYLOG_URL)
+        return process.env.GRAYLOG_URL;
     }
-    return 'http://localhost:24224';
+    return 'http://localhost:12201';
 };
 
 /**
@@ -224,7 +231,6 @@ VectorWatch.prototype.getAppPushUrl = function() {
     }
     return 'http://localhost:8080/VectorCloud/rest/v1/app/push';
 };
-
 
 /**
  * Sends the push packets
@@ -275,7 +281,6 @@ VectorWatch.prototype.sendPushPackets = function(packets) {
     send(appPackets, this.getAppPushUrl());
 };
 
-
 /***
  * Decide which logger to use
  * @returns {winston.Logger}
@@ -288,6 +293,7 @@ VectorWatch.prototype._decideLogger = function() {
                 new ElasticSearchTransport({
                     level: 'info',
                     handleExceptions: true,
+                    humanReadableUnhandledException: true,
                     json: true,
                     colorize: true,
                     timestamp: true,
@@ -295,16 +301,17 @@ VectorWatch.prototype._decideLogger = function() {
                 })
             ]
         });
-    } else if (this.options.production && process.env.FLUENTD_URL) {
+    } else if (this.options.production && process.env.GRAYLOG_URL) {
         return new (winston.Logger)({
             transports: [
-                new FluentTransport({
+                new GraylogTransport({
                     level: 'info',
                     handleExceptions: true,
+                    humanReadableUnhandledException: true,
                     json: true,
                     colorize: true,
                     timestamp: true,
-                    url: this.getFluentdUrl()
+                    url: this.getGraylogUrl()
                 })
             ]
         });
@@ -314,6 +321,7 @@ VectorWatch.prototype._decideLogger = function() {
                 new (winston.transports.Console)({
                     level: 'info',
                     handleExceptions: true,
+                    humanReadableUnhandledException: true,
                     json: true,
                     colorize: true,
                     timestamp: true,

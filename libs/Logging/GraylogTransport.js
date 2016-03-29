@@ -2,13 +2,14 @@ var util = require('util')
 var winston = require('winston')
 var Transport = winston.Transport
 var _dirname = require('path').dirname
-var FluentLogger = require('fluent-logger')
 var URL = require('url')
 var LogUtils = require('./LogUtils.js');
-var common = require('winston/lib/winston/common');
+var common = require('winston/lib/winston/common')
+var graylog = require("graylog2").graylog;
 
 
-var FluentTransport = function (options) {
+
+var GraylogTransport = function (options) {
     Transport.call(this, options);
 
     options = options || {};
@@ -25,26 +26,28 @@ var FluentTransport = function (options) {
     if (this.json) {
         this.stringify = options.stringify || function (obj) {
                 return JSON.stringify(obj, null, 2);
-            }
+        }
     }
 
-    var o = URL.parse(process.env.FLUENTD_URL);
+    var o = URL.parse(process.env.GRAYLOG_URL);
 
-    this.logger = FluentLogger.createFluentSender('docker', {
-        host: o.hostname ,
-        port: o.port,
-        timeout: 3.0,
-        reconnectInterval: 60000 // 1 minute
+    this.logger = new graylog({
+        servers: [
+            { 'host': o.hostname,
+               port: o.port
+            }
+        ],
+        bufferSize: 1024
     });
 }
 
 
-util.inherits(FluentTransport, winston.Transport);
+util.inherits(GraylogTransport, winston.Transport);
 
 //
 // Expose the name of this Transport on the prototype
 //
-FluentTransport.prototype.name = 'Fluentd';
+GraylogTransport.prototype.name = 'Graylog';
 
 //
 // ### function log (level, msg, [meta], callback)
@@ -54,40 +57,42 @@ FluentTransport.prototype.name = 'Fluentd';
 // #### @callback {function} Continuation to respond to when complete.
 // Core logging method exposed to Winston. Metadata is optional.
 //
-FluentTransport.prototype.log = function (level, msg, meta, callback) {
+GraylogTransport.prototype.log = function (level, msg, meta, callback) {
     if (this.silent) {
         return callback(null, true);
     }
-    if(meta && meta.stack !== undefined && meta.trace !== undefined) {
-        meta.name = process.env.APP_NAME || process.env.STREAM_NAME;
-    }
 
-    var message = {
-        level: level,
-        message: msg,
-        time: new Date().toISOString(),
+    var additional = {
         name: process.env.STREAM_NAME || process.env.APP_NAME,
         uuid: process.env.STREAM_UUID || process.env.APP_UUID,
-        unix: Date.now()
+        unix: Date.now(),
+        sLevel: level
     };
 
     if (meta) {
         for (var key in meta) {
             if (meta.hasOwnProperty(key)) {
-                message[key] = meta[key];
+                additional[key] = meta[key];
             }
         }
     }
-    message._index = LogUtils.getIndexNameAsDateString();
-    //catch json parse errors on request
+
     if (meta.body && meta.status) {
-        message.stack = common.log({ meta: meta});
+        additional.stack = common.log({ meta: meta});
+        msg = "Unexpected error"
     }
 
-    this.logger.emit('logs', message, message.unix, callback);
+    this.logger.log(msg, msg, additional, new Date(),
+        graylog.prototype.level[level.toUpperCase()] !== undefined ? graylog.prototype.level[level.toUpperCase()] : graylog.prototype.level.INFO);
+
+    this.logger.on('error', function(err) {
+        console.log(err)
+    })
+    return callback;
+
 }
 
-FluentTransport.prototype.clearLogs = function () { }
+GraylogTransport.prototype.clearLogs = function () { }
 
-module.exports = FluentTransport;
-module.exports.FluentTransport = FluentTransport;
+module.exports = GraylogTransport;
+module.exports.GraylogTransport = GraylogTransport;
