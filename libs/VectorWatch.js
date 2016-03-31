@@ -106,7 +106,7 @@ VectorWatch.prototype.getMiddleware = function() {
 
         if (!next) {
             next = function(err) {
-                _this.logger.error(err, { code: err ? 500 : 404 });
+                _this.logger.error(err, { status: err ? 500 : 404 });
                 res.writeHead(err ? 500 : 404);
                 res.end();
             };
@@ -131,7 +131,7 @@ VectorWatch.prototype.getMiddleware = function() {
             var response = event.createResponse(res);
 
             var timeout = setTimeout(function() {
-                _this.logger.error("Server timeout reached", { code: 500 });
+                _this.logger.error("Server timeout reached", { status: 500 });
                 res.writeHead(500);
                 res.end();
                 response.setExpired(true);

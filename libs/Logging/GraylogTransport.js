@@ -42,6 +42,7 @@ var GraylogTransport = function (options) {
 }
 
 
+
 util.inherits(GraylogTransport, winston.Transport);
 
 //
@@ -49,7 +50,6 @@ util.inherits(GraylogTransport, winston.Transport);
 //
 GraylogTransport.prototype.name = 'Graylog';
 
-//
 // ### function log (level, msg, [meta], callback)
 // #### @level {string} Level at which to log the message.
 // #### @msg {string} Message to log
@@ -82,8 +82,9 @@ GraylogTransport.prototype.log = function (level, msg, meta, callback) {
         msg = "Unexpected error"
     }
 
-    this.logger.log(msg, msg, additional, new Date(),
-        graylog.prototype.level[level.toUpperCase()] !== undefined ? graylog.prototype.level[level.toUpperCase()] : graylog.prototype.level.INFO);
+    if (level && typeof this.logger[level] === "function") {
+        this.logger[level](msg, msg, additional, new Date());
+    }
 
     this.logger.on('error', function(err) {
         console.log(err)
