@@ -7,6 +7,7 @@ var consts = require('./consts.js');
 var Event = require('./Event.js');
 var PushBuffer = require('./PushBuffer.js');
 var StreamPushPacket = require('./Stream/StreamPushPacket.js');
+var AppPushPacket = require('./Application/ApplicationPushPacket.js');
 var InvalidAuthTokensPushPacket = require('./Auth/InvalidAuthTokensPushPacket.js');
 var request = require('request');
 var ConsoleLogger = require('./Logging/ConsoleLogger.js');
@@ -96,6 +97,16 @@ VectorWatch.prototype.getOption = function(optionName, defaultValue) {
 };
 
 /**
+ * Returns a new event for specific request
+ * @param {Object}
+ * @returns {Event}
+ */
+
+VectorWatch.prototype.getEventFromRequest = function (req) {
+    return Event.fromRequest (this, req);
+};
+
+/**
  * Returns a middleware used for HTTP routing
  * @returns {Function}
  */
@@ -161,6 +172,20 @@ VectorWatch.prototype.pushStreamValue = function(channelLabel, value, delay) {
 
     this.pushBuffer.add(packet, delay);
 };
+
+/**
+ * Creates an Application push packet and sends it after a maximum of {delay} milliseconds
+ * @param userKey {String}
+ * @param value {Array}
+ * @param [delay] {Number}
+ */
+VectorWatch.prototype.pushAppPacket = function (userKey, value, delay) {
+    var packet = new AppPushPacket (this)
+            .setUserKey(userKey)
+            .addPushPacket(value);
+
+    this.pushBuffer.add(packet, delay);
+}
 
 /**
  * Creates a Invalid AuthTokens push packet and sends it immediately
@@ -249,6 +274,7 @@ VectorWatch.prototype.sendPushPackets = function(packets) {
         return packet.isAppPacket();
     });
 
+    var _this = this;
     var send = function(packets, pushUrl) {
         if (!packets.length) {
             return;
@@ -260,7 +286,7 @@ VectorWatch.prototype.sendPushPackets = function(packets) {
             json: packets.map(function(packet) {
                 return packet.toObject();
             }),
-            headers: { Authorization: this.getOption('token') }
+            headers: { Authorization: _this.getOption('token') }
         };
 
         request(options, function (err, response, body) {

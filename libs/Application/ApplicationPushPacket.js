@@ -32,6 +32,16 @@ ApplicationPushPacket.prototype.setUserKey = function(userKey) {
 };
 
 /**
+ * Replaces the current packets with the received ones
+ * @param packet {Array}
+ * @returns {ApplicationPushPacket}
+ */
+ApplicationPushPacket.prototype.addPushPacket = function (packet) {
+    this.packets = packet;
+    return this;
+}
+
+/**
  * @inheritdoc
  */
 ApplicationPushPacket.prototype.toObject = function() {
