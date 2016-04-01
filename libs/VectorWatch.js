@@ -232,11 +232,18 @@ VectorWatch.prototype.getAppPushUrl = function() {
     return 'http://localhost:8080/VectorCloud/rest/v1/app/push';
 };
 
+
+VectorWatch.prototype.flushPushPackets = function() {
+    return this.pushBuffer.flush();
+}
+
 /**
  * Sends the push packets
  * @param packets {PushPacket[]}
  */
 VectorWatch.prototype.sendPushPackets = function(packets) {
+    var _self = this;
+
     if (!packets) {
         return this.pushBuffer.flush();
     }
@@ -260,7 +267,7 @@ VectorWatch.prototype.sendPushPackets = function(packets) {
             json: packets.map(function(packet) {
                 return packet.toObject();
             }),
-            headers: { Authorization: this.getOption('token') }
+            headers: { Authorization: _self.getOption('token') }
         };
 
         request(options, function (err, response, body) {
