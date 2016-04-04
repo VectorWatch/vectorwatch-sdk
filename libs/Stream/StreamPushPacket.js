@@ -11,6 +11,10 @@ function StreamPushPacket() {
     this.type = 3;
     this.value = '';
     this.channelLabel = null;
+    this.streamVersion = 1;
+    this.contentVersion = 1;
+    this.secondsToLive = -1;
+
 }
 util.inherits(StreamPushPacket, PushPacket);
 
@@ -31,6 +35,37 @@ StreamPushPacket.prototype.setValue = function(value) {
  */
 StreamPushPacket.prototype.setChannelLabel = function(channelLabel) {
     this.channelLabel = channelLabel;
+    return this;
+};ContentVersion
+
+/**
+ * Sets the streamVersion
+ * @param streamVersion {String}
+ * @returns {StreamPushPacket}
+ */
+StreamPushPacket.prototype.setStreamVersion = function(streamVersion) {
+    this.streamVersion = streamVersion;
+    return this;
+};
+
+/**
+ * Sets the contentVersion
+ * @param contentVersion {String}
+ * @returns {StreamPushPacket}
+ */
+StreamPushPacket.prototype.setContentVersion = function(contentVersion) {
+    this.contentVersion = contentVersion;
+    return this;
+};
+
+
+/**
+ * Sets the secondsToLive
+ * @param secondsToLive {String}
+ * @returns {StreamPushPacket}
+ */
+StreamPushPacket.prototype.setSecondsToLive = function(secondsToLive) {
+    this.secondsToLive = secondsToLive;
     return this;
 };
 
