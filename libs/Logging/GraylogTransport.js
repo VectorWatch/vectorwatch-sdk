@@ -39,6 +39,9 @@ var GraylogTransport = function (options) {
         ],
         bufferSize: 1024
     });
+    this.logger.on('error', function(err) {
+        console.log(err)
+    })
 }
 
 
@@ -86,9 +89,6 @@ GraylogTransport.prototype.log = function (level, msg, meta, callback) {
         this.logger[level](msg, msg, additional, new Date());
     }
 
-    this.logger.on('error', function(err) {
-        console.log(err)
-    })
     return callback;
 
 }
