@@ -25,7 +25,7 @@ RequestOptionsEvent.prototype.getLocation = function() {
  * @returns {String}
  */
 RequestOptionsEvent.prototype.getSearchTerm = function() {
-    return this.req.body.searchTerm;
+    return this.req.body.searchTerm || this.req.body.value ;
 };
 
 /**
