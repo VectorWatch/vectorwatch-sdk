@@ -166,9 +166,14 @@ VectorWatch.prototype.getMiddleware = function() {
  * @param [delay] {Number}
  */
 VectorWatch.prototype.pushStreamValue = function(channelLabel, value, delay) {
+    var _self = this;
+
     var packet = new StreamPushPacket(this)
         .setChannelLabel(channelLabel)
-        .setValue(value);
+        .setValue(value)
+        .setContentVersion(_self.getOption('contentVersion'))
+        .setStreamVersion(_self.getOption('version'))
+        .setSecondsToLive(_self.getOption('secondsToLive'));
 
     this.pushBuffer.add(packet, delay);
 };
@@ -257,11 +262,17 @@ VectorWatch.prototype.getAppPushUrl = function() {
     return 'http://localhost:8080/VectorCloud/rest/v1/app/push';
 };
 
+
+VectorWatch.prototype.flushPushPackets = function() {
+    return this.pushBuffer.flush();
+}
+
 /**
  * Sends the push packets
  * @param packets {PushPacket[]}
  */
 VectorWatch.prototype.sendPushPackets = function(packets) {
+
     if (!packets) {
         return this.pushBuffer.flush();
     }
