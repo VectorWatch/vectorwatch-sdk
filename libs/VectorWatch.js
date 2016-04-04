@@ -161,8 +161,11 @@ VectorWatch.prototype.pushStreamValue = function(channelLabel, value, delay) {
         .setChannelLabel(channelLabel)
         .setValue(value)
         .setContentVersion(_self.getOption('contentVersion'))
-        .setStreamVersion(_self.getOption('version'))
-        .setSecondsToLive(_self.getOption('secondsToLive'));
+        .setStreamVersion(_self.getOption('version'));
+
+    if(_self.getOption('secondsToLive')) {
+        packet = packet.setSecondsToLive(_self.getOption('secondsToLive'));
+    }
 
     this.pushBuffer.add(packet, delay);
 };
