@@ -36,15 +36,15 @@ StreamPushPacket.prototype.setValue = function(value) {
 StreamPushPacket.prototype.setChannelLabel = function(channelLabel) {
     this.channelLabel = channelLabel;
     return this;
-};ContentVersion
+};
 
 /**
  * Sets the streamVersion
  * @param streamVersion {String}
  * @returns {StreamPushPacket}
  */
-StreamPushPacket.prototype.setStreamVersion = function(streamVersion) {
-    this.streamVersion = streamVersion;
+StreamPushPacket.prototype.setStreamVersion = function(version) {
+    this.streamVersion = version;
     return this;
 };
 
@@ -83,6 +83,9 @@ StreamPushPacket.prototype.toObject = function() {
     var packet = PushPacket.prototype.toObject.call(this);
     packet.channelLabel = this.channelLabel;
     packet.d = this.value;
+    packet.contentVersion = this.contentVersion;
+    packet.streamVersion = this.streamVersion;
+    packet.secondsToLive = this.secondsToLive;
     return packet;
 };
 
