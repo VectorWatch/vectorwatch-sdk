@@ -155,9 +155,14 @@ VectorWatch.prototype.getMiddleware = function() {
  * @param [delay] {Number}
  */
 VectorWatch.prototype.pushStreamValue = function(channelLabel, value, delay) {
+    var _self = this;
+
     var packet = new StreamPushPacket(this)
         .setChannelLabel(channelLabel)
-        .setValue(value);
+        .setValue(value)
+        .setContentVersion(_self.getOption('contentVersion'))
+        .setStreamVersion(_self.getOption('version'))
+        .setSecondsToLive(_self.getOption('secondsToLive'));
 
     this.pushBuffer.add(packet, delay);
 };
