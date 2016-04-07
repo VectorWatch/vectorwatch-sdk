@@ -57,7 +57,7 @@ Response.prototype.sendBadRequestError = function(message) {
     this.res.write(payload);
     this.res.end();
     this.emit('send');
-    _this.server.logger.warn("sentBadRequestError " + message, { status: 400 });
+    this.server.logger.warn("sentBadRequestError " + message, { status: 400 });
 };
 
 /**
@@ -79,7 +79,7 @@ Response.prototype.sendInvalidAuthTokens = function() {
     this.res.write(payload);
     this.res.end();
     this.emit('send');
-    _this.server.logger.warn("sendInvalidAuthTokens ", { status: 901 });
+    this.server.logger.warn("sendInvalidAuthTokens ", { status: 901 });
 };
 
 /**
