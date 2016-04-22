@@ -11,9 +11,6 @@ var AppPushPacket = require('./Application/ApplicationPushPacket.js');
 var InvalidAuthTokensPushPacket = require('./Auth/InvalidAuthTokensPushPacket.js');
 var request = require('request');
 var ConsoleLogger = require('./Logging/ConsoleLogger.js');
-var winston = require('winston');
-var ElasticSearchTransport = require('./Logging/ElasticSearchTransport');
-var GraylogTransport = require('./Logging/GraylogTransport');
 
 /**
  * @param [options] {Object}
@@ -328,6 +325,8 @@ VectorWatch.prototype.sendPushPackets = function(packets) {
  */
 VectorWatch.prototype._decideLogger = function() {
     if (this.options.production && process.env.ELASTICSEARCH_URL) {
+        var winston = require('winston');
+        var ElasticSearchTransport = require('./Logging/ElasticSearchTransport');
         return new (winston.Logger)({
             transports: [
                 new ElasticSearchTransport({
@@ -342,6 +341,8 @@ VectorWatch.prototype._decideLogger = function() {
             ]
         });
     } else if (this.options.production && process.env.GRAYLOG_URL) {
+        var winston = require('winston');
+        var GraylogTransport = require('./Logging/GraylogTransport');
         return new (winston.Logger)({
             transports: [
                 new GraylogTransport({
@@ -356,18 +357,7 @@ VectorWatch.prototype._decideLogger = function() {
             ]
         });
     } else {
-        return new (winston.Logger)({
-            transports: [
-                new (winston.transports.Console)({
-                    level: 'info',
-                    handleExceptions: true,
-                    humanReadableUnhandledException: true,
-                    json: true,
-                    colorize: true,
-                    timestamp: true,
-                })
-            ]
-        });
+        return require('./Logging/WinstonLoggerBrowser');
     }
 };
 
