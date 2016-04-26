@@ -1,6 +1,6 @@
 {
   "name": "vectorwatch-sdk",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "description": "SDK for implementing VectorWatch streams and apps.",
   "main": "index.js",
   "scripts": {
@@ -13,7 +13,7 @@
     "body-parser": "^1.15.0",
     "request": "^2.69.0",
     "elasticsearch": "10.1.3",
-    "vectorwatch-storageprovider-memory": "~1.1.0",
+    "vectorwatch-storageprovider-memory": "~1.1.1",
     "winston": "^2.2.0",
     "winston-elasticsearch": "^0.2.6",
     "graylog2": "0.1.3"
