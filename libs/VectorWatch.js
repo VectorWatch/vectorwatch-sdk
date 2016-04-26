@@ -10,7 +10,6 @@ var StreamPushPacket = require('./Stream/StreamPushPacket.js');
 var AppPushPacket = require('./Application/ApplicationPushPacket.js');
 var InvalidAuthTokensPushPacket = require('./Auth/InvalidAuthTokensPushPacket.js');
 var request = require('request');
-var ConsoleLogger = require('./Logging/ConsoleLogger.js');
 
 /**
  * @param [options] {Object}
