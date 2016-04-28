@@ -323,23 +323,7 @@ VectorWatch.prototype.sendPushPackets = function(packets) {
  * @private
  */
 VectorWatch.prototype._decideLogger = function() {
-    if (this.options.production && process.env.ELASTICSEARCH_URL) {
-        var winston = require('winston');
-        var ElasticSearchTransport = require('./Logging/ElasticSearchTransport');
-        return new (winston.Logger)({
-            transports: [
-                new ElasticSearchTransport({
-                    level: 'info',
-                    handleExceptions: true,
-                    humanReadableUnhandledException: true,
-                    json: true,
-                    colorize: true,
-                    timestamp: true,
-                    url: this.getElasticSearchUrl()
-                })
-            ]
-        });
-    } else if (this.options.production && process.env.GRAYLOG_URL) {
+   if (process.env.GRAYLOG_URL) {
         var winston = require('winston');
         var GraylogTransport = require('./Logging/GraylogTransport');
         return new (winston.Logger)({
@@ -352,6 +336,20 @@ VectorWatch.prototype._decideLogger = function() {
                     colorize: true,
                     timestamp: true,
                     url: this.getGraylogUrl()
+                })
+            ]
+        });
+   } else if (process.env.CONSOLE) {
+        var winston = require('winston');
+        return new (winston.Logger)({
+            transports: [
+                new (winston.transports.Console)({
+                    level: 'info',
+                    handleExceptions: true,
+                    humanReadableUnhandledException: true,
+                    json: true,
+                    colorize: true,
+                    timestamp: true,
                 })
             ]
         });
