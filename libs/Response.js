@@ -107,6 +107,12 @@ Response.prototype.send = function() {
     });
 };
 
+
+Response.prototype.sendNotFound = function() {
+    this.statusCode = 904;
+    this.send();
+}
+
 /**
  * Returns true if the response is already sent
  * @returns {Boolean}
