@@ -119,6 +119,12 @@ VectorWatch.prototype.getMiddleware = function() {
             };
         }
 
+        if (req.method.toLowerCase() === 'get' && req.url === '/health') {
+            res.writeHead(200);
+            res.end();
+            return;
+        }
+
         if (req.method.toLowerCase() !== 'post') {
             return next();
         }
