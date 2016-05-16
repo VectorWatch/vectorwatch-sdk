@@ -69,7 +69,8 @@ GraylogTransport.prototype.log = function (level, msg, meta, callback) {
         name: process.env.STREAM_NAME || process.env.APP_NAME,
         uuid: process.env.STREAM_UUID || process.env.APP_UUID,
         unix: Date.now(),
-        sLevel: level
+        sLevel: level,
+        production: process.env.PRODUCTION
     };
 
     if (meta) {
