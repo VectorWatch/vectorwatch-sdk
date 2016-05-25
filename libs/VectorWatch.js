@@ -369,10 +369,10 @@ VectorWatch.prototype._decideLogger = function() {
  * @param port {Number}
  * @param cb {Function}
  */
-VectorWatch.prototype.createServer = function(port, cb) {
+VectorWatch.prototype.createServer = function(cb) {
     var server = http.createServer(this.getMiddleware());
 
-    server.listen(port, cb);
+    server.listen((process.env.PORT || 8080), cb);
     return server;
 };
 
