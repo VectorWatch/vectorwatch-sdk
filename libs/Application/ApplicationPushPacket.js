@@ -47,7 +47,7 @@ ApplicationPushPacket.prototype.addPushPacket = function (packet) {
 ApplicationPushPacket.prototype.toObject = function() {
     var pushPacket = PushPacket.prototype.toObject.call(this);
     pushPacket.userKey = this.userKey;
-    pushPacket.contentPVersion = this.getServer().getOption('protocolVersion', '1');
+    pushPacket.contentPVersion = this.getServer().getOption('contentVersion', '1');
     pushPacket.data = this.packets.map(function(packet) {
         return packet.toObject();
     });
