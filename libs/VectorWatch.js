@@ -24,6 +24,9 @@ function VectorWatch(options) {
     this.options = options || {};
     this.authProvider = null;
     this.storageProvider = null;
+    
+    this.options.version = process.env.VERSION ? process.env.VERSION : 1;
+    this.options.contentVersion = process.env.CONTENT_P_VERSION ? process.env.CONTENT_P_VERSION : 1;
 
     var _this = this;
     this.pushBuffer = new PushBuffer();
