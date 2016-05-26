@@ -136,6 +136,10 @@ VectorWatch.prototype.getMiddleware = function() {
                 return next(err);
             }
 
+            if (req.method.toLowerCase() === 'post' && req.url === '/webhook') {
+                req.body.eventType = "WEBHOOK_CALL";
+            }
+
             if (!req.body.eventType) {
                 return next();
             }
@@ -153,7 +157,9 @@ VectorWatch.prototype.getMiddleware = function() {
             if (!event.emit(response)) {
                 response.send();
             }
-
+            if (!event.emit(response) || event.getEventName() === "webhook") {
+                response.send();
+            }
             response.on('send', function() {
                 clearTimeout(timeout);
             });
