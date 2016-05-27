@@ -5,8 +5,9 @@ var Promise = require('bluebird');
 var TextElement = require('./TextElement.js');
 var List = require('./List.js');
 var ChangeWatchfaceCommand = require('./ChangeWatchfaceCommand.js');
-
 var Popup = require('./Popup.js');
+var NumberElement = require('./NumberElement.js');
+var Gauge = require('./Gauge.js');
 
 /**
  * @constructor
@@ -81,6 +82,30 @@ ApplicationCallResponse.prototype.createPopup = function(content) {
     this.statusCode = 900;
     this.popup = new Popup(content);
     return this.popup;
+};
+
+/**
+ * Creates a gauge element and returns it
+ * @param elementId {Number}
+ * @param content {Object}
+ * @returns {Gauge}
+ */
+ApplicationCallResponse.prototype.createGaugeData = function(elementId, content) {
+    var packet = new Gauge(elementId, content);
+    this.packets.push(packet);
+    return packet;
+};
+
+/**
+ * Creates a number element update data and returns it
+ * @param elementId {Number}
+ * @param value {Number}
+ * @returns {NumberElement}
+ */
+ApplicationCallResponse.prototype.createNumberElementData = function(elementId, value) {
+    var packet = new NumberElement(elementId, value);
+    this.packets.push(packet);
+    return packet;
 };
 
 module.exports = ApplicationCallResponse;
