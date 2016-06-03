@@ -10,4 +10,16 @@ function WebhookResponse() {
 }
 util.inherits(WebhookResponse, Response);
 
+WebhookResponse.prototype.setContent = function(content) {
+    this.content = content;
+    return this;
+};
+
+/**
+ * @inheritdoc
+ */
+WebhookResponse.prototype.getPayloadAsync = function() {
+    return Promise.resolve(this.content);
+};
+
 module.exports = WebhookResponse;

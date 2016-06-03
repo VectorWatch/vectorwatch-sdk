@@ -12,6 +12,22 @@ function WebhookEvent() {
 }
 util.inherits(WebhookEvent, Event);
 
+
+/**
+ * Returns the auth credentials
+ * @returns {Object}
+ */
+WebhookEvent.prototype.getContent = function() {
+    return this.req.body;
+};
+
+WebhookEvent.prototype.getMethod = function() {
+   if(this.req.body && this.req.body.method) {
+       return this.req.body.method;
+   }
+   return undefined;
+};
+
 WebhookEvent.prototype.getResponseClass = function() {
     return require('./WebhookResponse.js');
 };

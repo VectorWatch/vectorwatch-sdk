@@ -9,6 +9,7 @@ var PushBuffer = require('./PushBuffer.js');
 var StreamPushPacket = require('./Stream/StreamPushPacket.js');
 var AppPushPacket = require('./Application/ApplicationPushPacket.js');
 var InvalidAuthTokensPushPacket = require('./Auth/InvalidAuthTokensPushPacket.js');
+var WebhookEvent = require('./Auth/WebhookEvent.js');
 var request = require('request');
 
 /**
@@ -157,18 +158,17 @@ VectorWatch.prototype.getMiddleware = function() {
                 response.setExpired(true);
             }, _this.getOption('eventMaxTimeout', 30000));
 
-            if (!event.emit(response)) {
+            if (!event.emit(response) || (event instanceof WebhookEvent && event.getMethod() !== 'GET')) {
                 response.send();
             }
-            if (!event.emit(response) || event.getEventName() === "webhook") {
-                response.send();
-            }
+
             response.on('send', function() {
                 clearTimeout(timeout);
             });
         });
     };
 };
+
 
 /**
  * Creates a Stream push packet and sends it after a maximum of {delay} milliseconds
