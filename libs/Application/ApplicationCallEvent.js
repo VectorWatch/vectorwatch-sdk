@@ -33,7 +33,7 @@ function ApplicationCallEvent() {
             ).then(function() {
                 // do nothing here
             }).catch(function(err) {
-                console.log("Uncaught exception: " + JSON.stringify(err.message || err) + "\n" + err.stack);
+                _this.getServer().logger.error("Uncaught exception: " + JSON.stringify(err.message || err) + "\n" + err.stack);
             });
         }).catch(function(err) {
             reject(err);
