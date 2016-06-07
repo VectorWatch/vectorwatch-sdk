@@ -57,6 +57,7 @@ Response.prototype.sendBadRequestError = function(message) {
     this.res.write(payload);
     this.res.end();
     this.emit('send');
+    this.server.logger.warn("sentBadRequestError " + message, { status: 400 });
 };
 
 /**
@@ -78,6 +79,7 @@ Response.prototype.sendInvalidAuthTokens = function() {
     this.res.write(payload);
     this.res.end();
     this.emit('send');
+    this.server.logger.warn("sendInvalidAuthTokens ", { status: 901 });
 };
 
 /**
@@ -101,9 +103,15 @@ Response.prototype.send = function() {
         _this.res.end();
         _this.emit('send');
     }).catch(function(err) {
-        console.log("Uncaught exception: " + JSON.stringify(err.message || err) + "\n" + err.stack);
+        _this.server.logger.error( err );
     });
 };
+
+
+Response.prototype.sendNotFound = function() {
+    this.statusCode = 904;
+    this.send();
+}
 
 /**
  * Returns true if the response is already sent

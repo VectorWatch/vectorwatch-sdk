@@ -1,4 +1,5 @@
 var util = require('util');
+var Promise = require('bluebird');
 var Event = require('../Event.js');
 
 /**

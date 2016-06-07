@@ -32,12 +32,22 @@ ApplicationPushPacket.prototype.setUserKey = function(userKey) {
 };
 
 /**
+ * Replaces the current packets with the received ones
+ * @param packet {Array}
+ * @returns {ApplicationPushPacket}
+ */
+ApplicationPushPacket.prototype.addPushPacket = function (packet) {
+    this.packets = packet;
+    return this;
+}
+
+/**
  * @inheritdoc
  */
 ApplicationPushPacket.prototype.toObject = function() {
     var pushPacket = PushPacket.prototype.toObject.call(this);
     pushPacket.userKey = this.userKey;
-    pushPacket.contentPVersion = this.getServer().getOption('protocolVersion', '1');
+    pushPacket.contentPVersion = this.getServer().getOption('contentVersion', '1');
     pushPacket.data = this.packets.map(function(packet) {
         return packet.toObject();
     });

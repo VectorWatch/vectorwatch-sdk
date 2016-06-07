@@ -123,6 +123,8 @@ Event.fromRequest = function(server, req) {
         Event = require('./Stream/UnsubscribeFromStreamEvent.js');
     } else if (eventType == 'APP_CALL') {
         Event = require('./Application/ApplicationCallEvent.js');
+    } else if (eventType == 'WEBHOOK_CALL') {
+        Event = require('./Auth/WebhookEvent.js');
     }
 
     if (!Event) {

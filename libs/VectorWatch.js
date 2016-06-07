@@ -7,7 +7,9 @@ var consts = require('./consts.js');
 var Event = require('./Event.js');
 var PushBuffer = require('./PushBuffer.js');
 var StreamPushPacket = require('./Stream/StreamPushPacket.js');
+var AppPushPacket = require('./Application/ApplicationPushPacket.js');
 var InvalidAuthTokensPushPacket = require('./Auth/InvalidAuthTokensPushPacket.js');
+var WebhookEvent = require('./Auth/WebhookEvent.js');
 var request = require('request');
 
 /**
@@ -23,14 +25,24 @@ function VectorWatch(options) {
     this.options = options || {};
     this.authProvider = null;
     this.storageProvider = null;
+    
+    this.options.version = process.env.VERSION ? process.env.VERSION : 1;
+    this.options.contentVersion = process.env.CONTENT_P_VERSION ? process.env.CONTENT_P_VERSION : 1;
 
     var _this = this;
     this.pushBuffer = new PushBuffer();
     this.pushBuffer.on('flush', function(packets) {
         _this.sendPushPackets(packets);
     });
+
+    this.logger = this._decideLogger(options);
+
 }
+
+
+
 util.inherits(VectorWatch, EventEmitter);
+
 
 /**
  * Returns the auth provider used for authenticating the user on external services
@@ -85,18 +97,36 @@ VectorWatch.prototype.getOption = function(optionName, defaultValue) {
 };
 
 /**
+ * Returns a new event for specific request
+ * @param {Object}
+ * @returns {Event}
+ */
+
+VectorWatch.prototype.getEventFromRequest = function (req) {
+    return Event.fromRequest (this, req);
+};
+
+/**
  * Returns a middleware used for HTTP routing
  * @returns {Function}
  */
 VectorWatch.prototype.getMiddleware = function() {
+
     var _this = this;
     return function(req, res, next) {
 
         if (!next) {
             next = function(err) {
+                _this.logger.error(err, { status: err ? 500 : 404 });
                 res.writeHead(err ? 500 : 404);
                 res.end();
             };
+        }
+
+        if (req.method.toLowerCase() === 'get' && req.url === '/health') {
+            res.writeHead(200);
+            res.end();
+            return;
         }
 
         if (req.method.toLowerCase() !== 'post') {
@@ -105,7 +135,14 @@ VectorWatch.prototype.getMiddleware = function() {
 
         // make sure body is parsed at this moment
         parseBody(req, res, function(err) {
-            if (err) return next(err);
+            if (err) {
+                _this.logger.error(err);
+                return next(err);
+            }
+
+            if (req.method.toLowerCase() === 'post' && req.url === '/webhook') {
+                req.body.eventType = "WEBHOOK_CALL";
+            }
 
             if (!req.body.eventType) {
                 return next();
@@ -115,12 +152,13 @@ VectorWatch.prototype.getMiddleware = function() {
             var response = event.createResponse(res);
 
             var timeout = setTimeout(function() {
+                _this.logger.error("Server timeout reached", { status: 500 });
                 res.writeHead(500);
                 res.end();
                 response.setExpired(true);
             }, _this.getOption('eventMaxTimeout', 30000));
 
-            if (!event.emit(response)) {
+            if (!event.emit(response) || (event instanceof WebhookEvent && event.getMethod() !== 'GET')) {
                 response.send();
             }
 
@@ -131,6 +169,7 @@ VectorWatch.prototype.getMiddleware = function() {
     };
 };
 
+
 /**
  * Creates a Stream push packet and sends it after a maximum of {delay} milliseconds
  * @param channelLabel {String}
@@ -138,12 +177,34 @@ VectorWatch.prototype.getMiddleware = function() {
  * @param [delay] {Number}
  */
 VectorWatch.prototype.pushStreamValue = function(channelLabel, value, delay) {
+    var _self = this;
+
     var packet = new StreamPushPacket(this)
         .setChannelLabel(channelLabel)
-        .setValue(value);
+        .setValue(value)
+        .setContentVersion(_self.getOption('contentVersion'))
+        .setStreamVersion(_self.getOption('version'));
+
+    if(_self.getOption('secondsToLive')) {
+        packet = packet.setSecondsToLive(_self.getOption('secondsToLive'));
+    }
 
     this.pushBuffer.add(packet, delay);
 };
+
+/**
+ * Creates an Application push packet and sends it after a maximum of {delay} milliseconds
+ * @param userKey {String}
+ * @param value {Array}
+ * @param [delay] {Number}
+ */
+VectorWatch.prototype.pushAppPacket = function (userKey, value, delay) {
+    var packet = new AppPushPacket (this)
+            .setUserKey(userKey)
+            .addPushPacket(value);
+
+    this.pushBuffer.add(packet, delay);
+}
 
 /**
  * Creates a Invalid AuthTokens push packet and sends it immediately
@@ -174,11 +235,34 @@ VectorWatch.prototype.pushInvalidAuthTokensForApp = function(userKey) {
  * @returns {String}
  */
 VectorWatch.prototype.getStreamPushUrl = function() {
-    if (this.getOption('production')) {
-        return 'http://52.16.43.57:8080/VectorCloud/rest/v1/stream/push';
+    if (process.env.PUSH_URL) {
+        return process.env.PUSH_URL;
     }
+    return 'http://localhost:8080/VectorCloud/rest/v1/stream/push';
+};
 
-    return 'http://52.16.43.57:8080/VectorCloud/rest/v1/stream/push';
+
+/**
+ * Returns elasticsearch url based on environment
+ * @returns {String}
+ */
+VectorWatch.prototype.getElasticSearchUrl = function() {
+    if (process.env.ELASTICSEARCH_URL) {
+        return process.env.ELASTICSEARCH_URL;
+    }
+    return 'http://localhost:9200';
+};
+
+/**
+ * Returns graylog url based on environment
+ * @returns {String}
+ */
+VectorWatch.prototype.getGraylogUrl = function() {
+    if (process.env.GRAYLOG_URL) {
+        console.log(process.env.GRAYLOG_URL)
+        return process.env.GRAYLOG_URL;
+    }
+    return 'http://localhost:12201';
 };
 
 /**
@@ -186,18 +270,23 @@ VectorWatch.prototype.getStreamPushUrl = function() {
  * @returns {String}
  */
 VectorWatch.prototype.getAppPushUrl = function() {
-    if (this.getOption('production')) {
-        return 'http://52.16.43.57:8080/VectorCloud/rest/v1/app/push';
+    if (process.env.PUSH_URL) {
+        return process.env.PUSH_URL;
     }
-
-    return 'http://52.16.43.57:8080/VectorCloud/rest/v1/app/push';
+    return 'http://localhost:8080/VectorCloud/rest/v1/app/push';
 };
+
+
+VectorWatch.prototype.flushPushPackets = function() {
+    return this.pushBuffer.flush();
+}
 
 /**
  * Sends the push packets
  * @param packets {PushPacket[]}
  */
 VectorWatch.prototype.sendPushPackets = function(packets) {
+
     if (!packets) {
         return this.pushBuffer.flush();
     }
@@ -210,6 +299,7 @@ VectorWatch.prototype.sendPushPackets = function(packets) {
         return packet.isAppPacket();
     });
 
+    var _this = this;
     var send = function(packets, pushUrl) {
         if (!packets.length) {
             return;
@@ -221,7 +311,7 @@ VectorWatch.prototype.sendPushPackets = function(packets) {
             json: packets.map(function(packet) {
                 return packet.toObject();
             }),
-            headers: { Authorization: this.getOption('token') }
+            headers: { Authorization: _this.getOption('token') }
         };
 
         request(options, function (err, response, body) {
@@ -242,15 +332,56 @@ VectorWatch.prototype.sendPushPackets = function(packets) {
     send(appPackets, this.getAppPushUrl());
 };
 
+/***
+ * Decide which logger to use
+ * @returns {winston.Logger}
+ * @private
+ */
+VectorWatch.prototype._decideLogger = function() {
+   if (process.env.GRAYLOG_URL) {
+        var winston = require('winston');
+        var GraylogTransport = require('./Logging/GraylogTransport');
+        return new (winston.Logger)({
+            transports: [
+                new GraylogTransport({
+                    level: 'info',
+                    handleExceptions: true,
+                    humanReadableUnhandledException: true,
+                    json: true,
+                    colorize: true,
+                    timestamp: true,
+                    url: this.getGraylogUrl()
+                })
+            ]
+        });
+   } else if (process.env.CONSOLE) {
+        var winston = require('winston');
+        return new (winston.Logger)({
+            transports: [
+                new (winston.transports.Console)({
+                    level: 'info',
+                    handleExceptions: true,
+                    humanReadableUnhandledException: true,
+                    json: true,
+                    colorize: true,
+                    timestamp: true,
+                })
+            ]
+        });
+    } else {
+        return require('./Logging/WinstonLoggerBrowser');
+    }
+};
+
 /**
  * Creates an HTTP server to listen for VectorWatch events
  * @param port {Number}
  * @param cb {Function}
  */
-VectorWatch.prototype.createServer = function(port, cb) {
+VectorWatch.prototype.createServer = function(cb) {
     var server = http.createServer(this.getMiddleware());
 
-    server.listen(port, cb);
+    server.listen((process.env.PORT || 8080), cb);
     return server;
 };
 
