@@ -15,6 +15,7 @@ function Response(server, res, event) {
     this.expired = false;
     this.event = event;
     this.statusCode = 200;
+    this.contentType = "application/json";
 
     /** @type {ServerResponse} */
     this.res = res;
@@ -96,8 +97,12 @@ Response.prototype.send = function() {
     this.getPayloadAsync().then(function(payloadObject) {
         var payload = JSON.stringify(payloadObject);
 
+        if (this.contentType !== "application/json") {
+            payload = payloadObject;
+        }
+
         _this.res.writeHead(_this.statusCode, {
-            'Content-Type': 'application/json'
+            'Content-Type': this.contentType
         });
         _this.res.write(payload || '');
         _this.res.end();
@@ -128,6 +133,27 @@ Response.prototype.isSent = function() {
  */
 Response.prototype.setExpired = function(value) {
     this.expired = !!value;
+    return this;
+};
+
+/**
+ * Sets content type
+ * @param value
+ * @returns {Response}
+ */
+Response.prototype.setContentType = function(value) {
+    this.contentType = value;
+    return this;
+};
+
+
+/**
+ * Sets content type to text/plain
+ * @param value
+ * @returns {Response}
+ */
+Response.prototype.setTextPlainContentType = function() {
+    this.contentType = "text/plain";
     return this;
 };
 
