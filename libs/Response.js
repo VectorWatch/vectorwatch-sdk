@@ -97,12 +97,12 @@ Response.prototype.send = function() {
     this.getPayloadAsync().then(function(payloadObject) {
         var payload = JSON.stringify(payloadObject);
 
-        if (this.contentType !== "application/json") {
+        if (_this.contentType !== "application/json") {
             payload = payloadObject;
         }
 
         _this.res.writeHead(_this.statusCode, {
-            'Content-Type': this.contentType
+            'Content-Type': _this.contentType
         });
         _this.res.write(payload || '');
         _this.res.end();
