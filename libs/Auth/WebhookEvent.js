@@ -22,8 +22,8 @@ WebhookEvent.prototype.getContent = function() {
 };
 
 WebhookEvent.prototype.getMethod = function() {
-   if(this.req.body && this.req.body.method) {
-       return this.req.body.method;
+   if(this.req.body && this.req.body.context && this.req.body.context.method) {
+       return this.req.body.context.method;
    }
    return undefined;
 };
