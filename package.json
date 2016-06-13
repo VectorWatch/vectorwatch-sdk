@@ -1,6 +1,6 @@
 {
   "name": "vectorwatch-sdk",
-  "version": "2.0.8",
+  "version": "2.0.9",
   "description": "SDK for implementing VectorWatch streams and apps.",
   "main": "index.js",
   "scripts": {
