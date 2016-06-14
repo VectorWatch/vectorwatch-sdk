@@ -26,8 +26,11 @@ function VectorWatch(options) {
     this.authProvider = null;
     this.storageProvider = null;
     
-    this.options.version = process.env.VERSION ? process.env.VERSION : 1;
-    this.options.contentVersion = process.env.CONTENT_P_VERSION ? process.env.CONTENT_P_VERSION : 1;
+    this.options.version = (typeof process.env.VERSION != 'undefined') ? process.env.VERSION : 1;
+    this.options.contentVersion = (typeof process.env.CONTENT_P_VERSION != 'undefined') ? process.env.CONTENT_P_VERSION : 1;
+
+    if (typeof this.options.streamUID == 'undefined') this.options.streamUID = process.env.STREAM_UID;
+    if (typeof this.options.token == 'undefined') this.options.token = process.env.VECTOR_TOKEN;
 
     var _this = this;
     this.pushBuffer = new PushBuffer();
