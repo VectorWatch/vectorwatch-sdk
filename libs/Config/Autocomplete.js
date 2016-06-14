@@ -35,6 +35,19 @@ Autocomplete.prototype.setAsYouType = function(minChars) {
 };
 
 /**
+ * Sets the type for the current list
+ * @param type {String} The type of the list
+ * @returns {Autocomplete}
+ */
+Autocomplete.prototype.setType = function(type) {
+    this.type = type;
+
+    return this;
+};
+
+
+
+/**
  * @inheritdoc
  */
 Autocomplete.prototype.getRenderSettingsObject = function() {

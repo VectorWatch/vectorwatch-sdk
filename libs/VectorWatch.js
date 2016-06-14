@@ -262,7 +262,6 @@ VectorWatch.prototype.getElasticSearchUrl = function() {
  */
 VectorWatch.prototype.getGraylogUrl = function() {
     if (process.env.GRAYLOG_URL) {
-        console.log(process.env.GRAYLOG_URL)
         return process.env.GRAYLOG_URL;
     }
     return 'http://localhost:12201';
@@ -319,11 +318,12 @@ VectorWatch.prototype.sendPushPackets = function(packets) {
 
         request(options, function (err, response, body) {
             if (err) {
-                // log this error
+                _this.logger.error("Uncaught exception " + response.statusCode + ": " + JSON.stringify(err.message || err) + "\n" + err.stack);
                 return;
             }
 
             if (response.statusCode != 200) {
+                _this.logger.error("Uncaught exception " + response.statusCode);
                 // log body
             }
 
