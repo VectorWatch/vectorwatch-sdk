@@ -315,7 +315,7 @@ VectorWatch.prototype.sendPushPackets = function(packets) {
 
         request(options, function (err, response, body) {
             if (err) {
-                _this.logger.error("Uncaught exception " + response.statusCode + ": " + JSON.stringify(err.message || err) + "\n" + err.stack);
+                _this.logger.error("Uncaught exception in sendPushPackets: " + JSON.stringify(err.message || err) + "\n" + err.stack);
                 return;
             }
 
