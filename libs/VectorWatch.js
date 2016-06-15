@@ -11,6 +11,7 @@ var AppPushPacket = require('./Application/ApplicationPushPacket.js');
 var InvalidAuthTokensPushPacket = require('./Auth/InvalidAuthTokensPushPacket.js');
 var WebhookEvent = require('./Auth/WebhookEvent.js');
 var request = require('request');
+var url = require('url');
 
 /**
  * @param [options] {Object}
@@ -132,22 +133,18 @@ VectorWatch.prototype.getMiddleware = function() {
             return;
         }
 
-        if (req.method.toLowerCase() !== 'post') {
-            return next();
-        }
+        var url_parts = url.parse(req.url, true);
+        req.query = url_parts.query;
 
         // make sure body is parsed at this moment
         parseBody(req, res, function(err) {
+
             if (err) {
                 _this.logger.error(err);
                 return next(err);
             }
 
-            if (req.method.toLowerCase() === 'post' && req.url === '/webhook') {
-                req.body.eventType = "WEBHOOK_CALL";
-            }
-
-            if (!req.body.eventType) {
+            if (!req.headers['event-type']) {
                 return next();
             }
 
@@ -161,7 +158,7 @@ VectorWatch.prototype.getMiddleware = function() {
                 response.setExpired(true);
             }, _this.getOption('eventMaxTimeout', 30000));
 
-            if (!event.emit(response) || (event instanceof WebhookEvent && event.getMethod() !== 'GET')) {
+            if (!event.emit(response)) {
                 response.send();
             }
 

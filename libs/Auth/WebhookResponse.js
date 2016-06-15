@@ -1,5 +1,6 @@
 var util = require('util');
 var Response = require('../Response.js');
+var Promise = require('bluebird');
 
 /**
  * @constructor
