@@ -133,8 +133,10 @@ VectorWatch.prototype.getMiddleware = function() {
             return;
         }
 
-        var url_parts = url.parse(req.url, true);
-        req.query = url_parts.query;
+        if (req.url) {
+            var url_parts = url.parse(req.url, true);
+            req.query = url_parts.query;
+        }
 
         // make sure body is parsed at this moment
         parseBody(req, res, function(err) {
