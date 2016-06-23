@@ -16,6 +16,12 @@ winstonLogger.warn = function(msgStr, msgObj) {
 	}});
 }
 
+winstonLogger.info = function(msgStr, msgObj) {
+	console.log({'info': {
+		'msg': msgStr,
+		'obj': msgObj
+	}});
+}
 
 winstonLogger.log = function(level, msg) {
 	console.log({'log': {
