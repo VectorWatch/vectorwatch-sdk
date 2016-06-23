@@ -146,6 +146,15 @@ Response.prototype.setContentType = function(value) {
     return this;
 };
 
+/**
+ * Sets status code
+ * @param value
+ * @returns {Response}
+ */
+Response.prototype.setStatusCode = function(value) {
+    this.statusCode = value;
+    return this;
+};
 
 /**
  * Sets content type to text/plain
