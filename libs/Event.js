@@ -158,6 +158,8 @@ Event.fromRequest = function(server, req) {
         Event = require('./Application/ApplicationCallEvent.js');
     } else if (eventType == 'WEBHOOK_CALL') {
         Event = require('./Auth/WebhookEvent.js');
+    } else if (eventType == 'GET_DATA_CALL') {
+        Event = require('./Auth/GetStreamDataEvent.js');
     }
 
     if (!Event) {
