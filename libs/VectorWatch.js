@@ -203,7 +203,7 @@ VectorWatch.prototype.pushStreamValue = function(channelLabel, value, delay) {
  * @param value {String}
  * @param [delay] {Number}
  */
-VectorWatch.prototype.pushStreamToast = function(channelLabel, value, delay) {
+VectorWatch.prototype.pushNotification = function(channelLabel, value, delay) {
     var _self = this;
 
     var packet = new StreamPushPacketToast(this)
