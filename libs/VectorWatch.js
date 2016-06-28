@@ -7,6 +7,7 @@ var consts = require('./consts.js');
 var Event = require('./Event.js');
 var PushBuffer = require('./PushBuffer.js');
 var StreamPushPacket = require('./Stream/StreamPushPacket.js');
+var StreamPushPacketToast = require('./Stream/StreamPushPacketToast.js');
 var AppPushPacket = require('./Application/ApplicationPushPacket.js');
 var InvalidAuthTokensPushPacket = require('./Auth/InvalidAuthTokensPushPacket.js');
 var WebhookEvent = require('./Auth/WebhookEvent.js');
@@ -190,6 +191,26 @@ VectorWatch.prototype.pushStreamValue = function(channelLabel, value, delay) {
     if(_self.getOption('secondsToLive')) {
         packet = packet.setSecondsToLive(_self.getOption('secondsToLive'));
     }
+
+    this.pushBuffer.add(packet, delay);
+};
+
+
+
+/**
+ * Creates a Stream push toast packet and sends it after a maximum of {delay} milliseconds
+ * @param channelLabel {String}
+ * @param value {String}
+ * @param [delay] {Number}
+ */
+VectorWatch.prototype.pushStreamToast = function(channelLabel, value, delay) {
+    var _self = this;
+
+    var packet = new StreamPushPacketToast(this)
+        .setChannelLabel(channelLabel)
+        .setValue(value)
+        .setContentVersion(_self.getOption('contentVersion'))
+        .setStreamVersion(_self.getOption('version'));
 
     this.pushBuffer.add(packet, delay);
 };
