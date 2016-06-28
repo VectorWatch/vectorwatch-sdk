@@ -147,7 +147,7 @@ VectorWatch.prototype.getMiddleware = function() {
                 return next(err);
             }
 
-            if (!req.headers['event-type']) {
+            if (!req.headers['event-type'] && !(req.body && req.body.eventType)) {
                 return next();
             }
 
