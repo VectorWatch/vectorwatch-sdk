@@ -1,5 +1,6 @@
 var util = require('util');
 var PushPacket = require('../PushPacket.js');
+var Consts = require('../consts.js');
 
 /**
  * @constructor
@@ -8,7 +9,7 @@ var PushPacket = require('../PushPacket.js');
 function StreamPushPacket() {
     PushPacket.apply(this, arguments);
 
-    this.type = 3;
+    this.type = Consts.PushType.STREAM_PUSH_DATA;
     this.value = '';
     this.channelLabel = null;
     this.streamVersion = 1;
