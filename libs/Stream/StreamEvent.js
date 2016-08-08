@@ -19,7 +19,7 @@ util.inherits(StreamEvent, Event);
  * Returns the channelLabel
  * @returns {null|string}
  */
-StreamEvent.prototype.getChannelLabel = function () {
+StreamEvent.prototype.getChannelLabel = function() {
     this.getUserSettings();
     return this.channelLabel;
 };
@@ -27,7 +27,7 @@ StreamEvent.prototype.getChannelLabel = function () {
 /**
  * @inheritdoc
  */
-StreamEvent.prototype.getAuthCredentials = function () {
+StreamEvent.prototype.getAuthCredentials = function() {
     this.getUserSettings();
     return this.authCredentials;
 };
@@ -35,7 +35,7 @@ StreamEvent.prototype.getAuthCredentials = function () {
 /**
  * @inheritdoc
  */
-StreamEvent.prototype.getUserSettings = function (checkForContextual) {
+StreamEvent.prototype.getUserSettings = function(checkForContextual) {
     if (!this.userSettings) {
         var configStreamSettings = this.req.body.configStreamSettings || {};
         var userSettingsMap = configStreamSettings.userSettingsMap || {};
