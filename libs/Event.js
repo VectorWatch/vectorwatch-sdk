@@ -102,6 +102,39 @@ Event.prototype.emit = function(response) {
     return this.getServer().emit(this.getEventName(), this, response);
 };
 
+
+/**
+ * Get body
+ * @returns {*}
+ */
+Event.prototype.getContent = function() {
+    return this.req.body;
+};
+
+/**
+ * Get http method
+ * @returns {*}
+ */
+Event.prototype.getMethod = function() {
+    return this.req.method;
+};
+
+/**
+ * Get query params
+ * @returns {*}
+ */
+Event.prototype.getQuery = function() {
+    return this.req.query;
+};
+
+/**
+ * Get header params
+ * @returns {*}
+ */
+Event.prototype.getHeaders = function() {
+    return this.req.headers;
+};
+
 /**
  * Creates a concrete event based on request data
  * @param server {VectorWatch}
@@ -110,7 +143,7 @@ Event.prototype.emit = function(response) {
  */
 Event.fromRequest = function(server, req) {
     var Event = null;
-    var eventType = req.body.eventType;
+    var eventType = req.headers["event-type"]
     if (eventType == 'REQ_AUTH') {
         Event = require('./Auth/RequestAuthEvent.js');
     } else if (eventType == 'REQ_CONFIG') {
@@ -123,6 +156,10 @@ Event.fromRequest = function(server, req) {
         Event = require('./Stream/UnsubscribeFromStreamEvent.js');
     } else if (eventType == 'APP_CALL') {
         Event = require('./Application/ApplicationCallEvent.js');
+    } else if (eventType == 'WEBHOOK_CALL') {
+        Event = require('./Auth/WebhookEvent.js');
+    } else if (eventType == 'REQ_DATA') {
+        Event = require('./Stream/GetStreamDataEvent.js');
     }
 
     if (!Event) {

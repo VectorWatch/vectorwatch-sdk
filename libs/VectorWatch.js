@@ -7,9 +7,12 @@ var consts = require('./consts.js');
 var Event = require('./Event.js');
 var PushBuffer = require('./PushBuffer.js');
 var StreamPushPacket = require('./Stream/StreamPushPacket.js');
+var StreamPushPacketToast = require('./Stream/StreamPushPacketToast.js');
 var AppPushPacket = require('./Application/ApplicationPushPacket.js');
 var InvalidAuthTokensPushPacket = require('./Auth/InvalidAuthTokensPushPacket.js');
+var WebhookEvent = require('./Auth/WebhookEvent.js');
 var request = require('request');
+var url = require('url');
 
 /**
  * @param [options] {Object}
@@ -24,6 +27,12 @@ function VectorWatch(options) {
     this.options = options || {};
     this.authProvider = null;
     this.storageProvider = null;
+    
+    this.options.version = (typeof process.env.VERSION != 'undefined') ? process.env.VERSION : 1;
+    this.options.contentVersion = (typeof process.env.CONTENT_P_VERSION != 'undefined') ? process.env.CONTENT_P_VERSION : 1;
+
+    if (typeof this.options.streamUID == 'undefined') this.options.streamUID = process.env.STREAM_UUID;
+    if (typeof this.options.token == 'undefined') this.options.token = process.env.VECTOR_TOKEN;
 
     var _this = this;
     this.pushBuffer = new PushBuffer();
@@ -94,7 +103,11 @@ VectorWatch.prototype.getOption = function(optionName, defaultValue) {
 
 /**
  * Returns a new event for specific request
+<<<<<<< HEAD
  * @param req {Object}
+=======
+ * @param {Object}
+>>>>>>> 5a15ece2864ef0c16daa458a0c4f263e99001a76
  * @returns {Event}
  */
 
@@ -125,18 +138,20 @@ VectorWatch.prototype.getMiddleware = function() {
             return;
         }
 
-        if (req.method.toLowerCase() !== 'post') {
-            return next();
+        if (req.url) {
+            var url_parts = url.parse(req.url, true);
+            req.query = url_parts.query;
         }
 
         // make sure body is parsed at this moment
         parseBody(req, res, function(err) {
+
             if (err) {
                 _this.logger.error(err);
                 return next(err);
             }
 
-            if (!req.body.eventType) {
+            if (!req.headers['event-type'] && !(req.body && req.body.eventType)) {
                 return next();
             }
 
@@ -161,17 +176,18 @@ VectorWatch.prototype.getMiddleware = function() {
     };
 };
 
+
 /**
  * Creates a Stream push packet and sends it after a maximum of {delay} milliseconds
  * @param channelLabel {String}
  * @param value {String}
  * @param [delay] {Number}
  */
-VectorWatch.prototype.pushStreamValue = function(settingItem, value, delay) {
+VectorWatch.prototype.pushStreamValue = function(channelLabel, value, delay) {
     var _self = this;
 
     var packet = new StreamPushPacket(this)
-        .setChannelLabel(settingItem.channelLabel)
+        .setChannelLabel(channelLabel)
         .setContextualChannelLabel(settingItem.contextualChannelLabel)
         .setValue(value)
         .setContentVersion(_self.getOption('contentVersion'))
@@ -180,6 +196,26 @@ VectorWatch.prototype.pushStreamValue = function(settingItem, value, delay) {
     if(_self.getOption('secondsToLive')) {
         packet = packet.setSecondsToLive(_self.getOption('secondsToLive'));
     }
+
+    this.pushBuffer.add(packet, delay);
+};
+
+
+
+/**
+ * Creates a Stream push toast packet and sends it after a maximum of {delay} milliseconds
+ * @param channelLabel {String}
+ * @param value {String}
+ * @param [delay] {Number}
+ */
+VectorWatch.prototype.pushNotification = function(channelLabel, value, delay) {
+    var _self = this;
+
+    var packet = new StreamPushPacketToast(this)
+        .setChannelLabel(channelLabel)
+        .setValue(value)
+        .setContentVersion(_self.getOption('contentVersion'))
+        .setStreamVersion(_self.getOption('version'));
 
     this.pushBuffer.add(packet, delay);
 };
@@ -251,7 +287,6 @@ VectorWatch.prototype.getElasticSearchUrl = function() {
  */
 VectorWatch.prototype.getGraylogUrl = function() {
     if (process.env.GRAYLOG_URL) {
-        console.log(process.env.GRAYLOG_URL)
         return process.env.GRAYLOG_URL;
     }
     return 'http://localhost:12201';
@@ -308,11 +343,12 @@ VectorWatch.prototype.sendPushPackets = function(packets) {
 
         request(options, function (err, response, body) {
             if (err) {
-                // log this error
+                _this.logger.error("Uncaught exception in sendPushPackets: " + JSON.stringify(err.message || err) + "\n" + err.stack);
                 return;
             }
 
             if (response.statusCode != 200) {
+                _this.logger.error("Uncaught exception " + response.statusCode);
                 // log body
             }
 
@@ -370,10 +406,10 @@ VectorWatch.prototype._decideLogger = function() {
  * @param port {Number}
  * @param cb {Function}
  */
-VectorWatch.prototype.createServer = function(port, cb) {
+VectorWatch.prototype.createServer = function(cb) {
     var server = http.createServer(this.getMiddleware());
 
-    server.listen(port, cb);
+    server.listen((process.env.PORT || 8080), cb);
     return server;
 };
 

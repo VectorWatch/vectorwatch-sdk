@@ -1,4 +1,5 @@
 var util = require('util');
+var Promise = require('bluebird');
 var Event = require('../Event.js');
 
 /**
@@ -32,7 +33,7 @@ function ApplicationCallEvent() {
             ).then(function() {
                 // do nothing here
             }).catch(function(err) {
-                // todo: log this error
+                _this.getServer().logger.error("Uncaught exception: " + JSON.stringify(err.message || err) + "\n" + err.stack);
             });
         }).catch(function(err) {
             reject(err);

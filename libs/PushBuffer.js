@@ -20,7 +20,7 @@ util.inherits(PushBuffer, EventEmitter);
  * @param [delay] {Number}
  */
 PushBuffer.prototype.add = function(packet, delay) {
-    delay = delay || 30 * 1000;
+    delay = delay || 1 * 1000;
     this.queue.push(packet);
 
     var now = Date.now(), _this = this;

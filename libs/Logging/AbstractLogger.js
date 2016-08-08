@@ -3,7 +3,7 @@
  */
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
-
+var winston = require('winston');
 
 /**
  * @constructor
@@ -17,7 +17,7 @@ util.inherits(AbstractLogger, EventEmitter);
  * @param level
  * @param messageg
  * */
- AbstractLogger.prototype.log = function(level, message) { };
+AbstractLogger.prototype.log = function(level, message) { };
 
 
 /***

@@ -47,10 +47,20 @@ var ButtonEvents = {
     Press: 'PRESS'
 };
 
+/**
+ * @readonly
+ * @enum {String}
+ */
+var PushType = Object.freeze({
+    STREAM_PUSH_DATA: 3,
+    STREAM_PUSH_TOAST_DATA: 9
+});
+
 module.exports = {
     TTL: TTL,
     Actions: Actions,
     Animations: Animations,
     Buttons: Buttons,
-    ButtonEvents: ButtonEvents
+    ButtonEvents: ButtonEvents,
+    PushType: PushType
 };

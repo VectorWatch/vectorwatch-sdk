@@ -15,6 +15,7 @@ function Response(server, res, event) {
     this.expired = false;
     this.event = event;
     this.statusCode = 200;
+    this.contentType = "application/json";
 
     /** @type {ServerResponse} */
     this.res = res;
@@ -57,6 +58,7 @@ Response.prototype.sendBadRequestError = function(message) {
     this.res.write(payload);
     this.res.end();
     this.emit('send');
+    this.server.logger.warn("sentBadRequestError " + message, { status: 400 });
 };
 
 /**
@@ -78,6 +80,7 @@ Response.prototype.sendInvalidAuthTokens = function() {
     this.res.write(payload);
     this.res.end();
     this.emit('send');
+    this.server.logger.warn("sendInvalidAuthTokens ", { status: 901 });
 };
 
 /**
@@ -94,16 +97,26 @@ Response.prototype.send = function() {
     this.getPayloadAsync().then(function(payloadObject) {
         var payload = JSON.stringify(payloadObject);
 
+        if (_this.contentType !== "application/json") {
+            payload = payloadObject;
+        }
+
         _this.res.writeHead(_this.statusCode, {
-            'Content-Type': 'application/json'
+            'Content-Type': _this.contentType
         });
         _this.res.write(payload || '');
         _this.res.end();
         _this.emit('send');
     }).catch(function(err) {
-        // todo: log this error
+        _this.server.logger.error( err );
     });
 };
+
+
+Response.prototype.sendNotFound = function() {
+    this.statusCode = 904;
+    this.send();
+}
 
 /**
  * Returns true if the response is already sent
@@ -120,6 +133,36 @@ Response.prototype.isSent = function() {
  */
 Response.prototype.setExpired = function(value) {
     this.expired = !!value;
+    return this;
+};
+
+/**
+ * Sets content type
+ * @param value
+ * @returns {Response}
+ */
+Response.prototype.setContentType = function(value) {
+    this.contentType = value;
+    return this;
+};
+
+/**
+ * Sets status code
+ * @param value
+ * @returns {Response}
+ */
+Response.prototype.setStatusCode = function(value) {
+    this.statusCode = value;
+    return this;
+};
+
+/**
+ * Sets content type to text/plain
+ * @param value
+ * @returns {Response}
+ */
+Response.prototype.setTextPlainContentType = function() {
+    this.contentType = "text/plain";
     return this;
 };
 

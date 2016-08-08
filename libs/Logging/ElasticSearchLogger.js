@@ -2,6 +2,7 @@ var ElasticSearch = require('elasticsearch');
 var util = require('util');
 var AbstractLogger = require('./AbstractLogger.js');
 var EventEmitter = require('events').EventEmitter;
+var LogUtils = require('./LogUtils.js');
 
 /**
  * constructor
@@ -17,7 +18,7 @@ function ElasticSearchLogger(options, uri) {
     this.timestamp = Infinity;
     this.options = options;
 
-    this.client = new ElasticSearch .Client({ host: uri });
+    this.client = new ElasticSearch.Client({ host: uri });
     var _this = this;
     this.on('flush', function(packets) {
         logDelayedLogEvents(_this.client, packets);
@@ -25,6 +26,8 @@ function ElasticSearchLogger(options, uri) {
 };
 
 util.inherits(ElasticSearchLogger, AbstractLogger);
+
+
 
 /**
  * Adds a message packet to the buffer
@@ -40,17 +43,18 @@ ElasticSearchLogger.prototype.logDelayed = function(level, message, delay) {
 
     var packet = [
         { index:  {
-            _index: getIndexNameAsDateString() ,
+            _index: LogUtils.getIndexNameAsDateString() ,
             _type: "logs"
         }
         },
-        {
-            name: process.env.STREAM_NAME || process.env.APP_NAME,
-            uuid: process.env.STREAM_UUID || process.env.APP_UUID,
-            message: message,
-            level: level,
-            date: now
-        }];
+        ];
+
+    message.level = level;
+    message.name = process.env.STREAM_NAME || process.env.APP_NAME;
+    message.uuid =  process.env.STREAM_UUID || process.env.APP_UUID;
+    message.unix = now;
+
+    packet.push(message);
 
     this.queue.push(packet);
 
@@ -77,19 +81,19 @@ ElasticSearchLogger.prototype.log = function(level, message) {
 
     level = this._processLogLevel(level);
 
+
     packet = [{
         index: {
             _index: getIndexNameAsDateString(),
             _type: "logs"
         }
-    },{
-        name: process.env.STREAM_NAME || process.env.APP_NAME,
-        uuid: process.env.STREAM_UUID || process.env.APP_UUID,
-        message: message,
-        level: level,
-        date: now
     }];
 
+    message.level = level;
+    message.name = process.env.STREAM_NAME || process.env.APP_NAME;
+    message.uuid =  process.env.STREAM_UUID || process.env.APP_UUID;
+    message.unix = now;
+    packet.push(message);
 
     doLogging(this.client, packet);
 };
@@ -131,18 +135,7 @@ var logDelayedLogEvents = function(client, packets) {
    doLogging(client, body);
 }
 
-/***
- * Generate index name as vector-YYYY.MM.dd
- * @returns {string}
- */
-var getIndexNameAsDateString = function() {
-    var now = new Date();
-    return "vector-" + now.getFullYear() + "." + addZero((now.getMonth() + 1)) + "." + addZero(now.getDate());
-}
 
-var addZero = function(n) {
-    return n < 10 ? '0' + n :'' + n;
-}
 
 var doLogging = function(client, message) {
 
