@@ -7,10 +7,10 @@ var consts = require('./consts.js');
 var Event = require('./Event.js');
 var PushBuffer = require('./PushBuffer.js');
 var StreamPushPacket = require('./Stream/StreamPushPacket.js');
+var AppPushPacket = require('./Application/ApplicationPushPacket.js');
 var InvalidAuthTokensPushPacket = require('./Auth/InvalidAuthTokensPushPacket.js');
 var request = require('request');
-var ElasticSearchLogger = require('./Logging/ElasticSearchLogger.js');
-var ConsoleLogger = require('./Logging/ConsoleLogger.js');
+
 /**
  * @param [options] {Object}
  * @constructor
@@ -31,15 +31,14 @@ function VectorWatch(options) {
         _this.sendPushPackets(packets);
     });
 
-    if (options.production || options.logger === 'elastic') {
-        this.logger = new ElasticSearchLogger(this.options, this.getElasticSearchUrl());
-    } else {
-        this.logger = new ConsoleLogger();
-    }
-
+    this.logger = this._decideLogger(options);
 
 }
+
+
+
 util.inherits(VectorWatch, EventEmitter);
+
 
 /**
  * Returns the auth provider used for authenticating the user on external services
@@ -94,18 +93,36 @@ VectorWatch.prototype.getOption = function(optionName, defaultValue) {
 };
 
 /**
+ * Returns a new event for specific request
+ * @param req {Object}
+ * @returns {Event}
+ */
+
+VectorWatch.prototype.getEventFromRequest = function (req) {
+    return Event.fromRequest (this, req);
+};
+
+/**
  * Returns a middleware used for HTTP routing
  * @returns {Function}
  */
 VectorWatch.prototype.getMiddleware = function() {
+
     var _this = this;
     return function(req, res, next) {
 
         if (!next) {
             next = function(err) {
+                _this.logger.error(err, { status: err ? 500 : 404 });
                 res.writeHead(err ? 500 : 404);
                 res.end();
             };
+        }
+
+        if (req.method.toLowerCase() === 'get' && req.url === '/health') {
+            res.writeHead(200);
+            res.end();
+            return;
         }
 
         if (req.method.toLowerCase() !== 'post') {
@@ -114,7 +131,10 @@ VectorWatch.prototype.getMiddleware = function() {
 
         // make sure body is parsed at this moment
         parseBody(req, res, function(err) {
-            if (err) return next(err);
+            if (err) {
+                _this.logger.error(err);
+                return next(err);
+            }
 
             if (!req.body.eventType) {
                 return next();
@@ -124,6 +144,7 @@ VectorWatch.prototype.getMiddleware = function() {
             var response = event.createResponse(res);
 
             var timeout = setTimeout(function() {
+                _this.logger.error("Server timeout reached", { status: 500 });
                 res.writeHead(500);
                 res.end();
                 response.setExpired(true);
@@ -146,13 +167,36 @@ VectorWatch.prototype.getMiddleware = function() {
  * @param value {String}
  * @param [delay] {Number}
  */
-VectorWatch.prototype.pushStreamValue = function(channelLabel, value, delay) {
+VectorWatch.prototype.pushStreamValue = function(settingItem, value, delay) {
+    var _self = this;
+
     var packet = new StreamPushPacket(this)
-        .setChannelLabel(channelLabel)
-        .setValue(value);
+        .setChannelLabel(settingItem.channelLabel)
+        .setContextualChannelLabel(settingItem.contextualChannelLabel)
+        .setValue(value)
+        .setContentVersion(_self.getOption('contentVersion'))
+        .setStreamVersion(_self.getOption('version'));
+
+    if(_self.getOption('secondsToLive')) {
+        packet = packet.setSecondsToLive(_self.getOption('secondsToLive'));
+    }
 
     this.pushBuffer.add(packet, delay);
 };
+
+/**
+ * Creates an Application push packet and sends it after a maximum of {delay} milliseconds
+ * @param userKey {String}
+ * @param value {Array}
+ * @param [delay] {Number}
+ */
+VectorWatch.prototype.pushAppPacket = function (userKey, value, delay) {
+    var packet = new AppPushPacket (this)
+            .setUserKey(userKey)
+            .addPushPacket(value);
+
+    this.pushBuffer.add(packet, delay);
+}
 
 /**
  * Creates a Invalid AuthTokens push packet and sends it immediately
@@ -202,6 +246,18 @@ VectorWatch.prototype.getElasticSearchUrl = function() {
 };
 
 /**
+ * Returns graylog url based on environment
+ * @returns {String}
+ */
+VectorWatch.prototype.getGraylogUrl = function() {
+    if (process.env.GRAYLOG_URL) {
+        console.log(process.env.GRAYLOG_URL)
+        return process.env.GRAYLOG_URL;
+    }
+    return 'http://localhost:12201';
+};
+
+/**
  * Returns the app push url based on environment
  * @returns {String}
  */
@@ -212,23 +268,17 @@ VectorWatch.prototype.getAppPushUrl = function() {
     return 'http://localhost:8080/VectorCloud/rest/v1/app/push';
 };
 
-/**
- * Returns the app push url based on environment
- * @returns {String}
- */
-VectorWatch.prototype.getAppPushUrl = function() {
-    if (this.getOption('production')) {
-        return 'http://52.16.43.57:8080/VectorCloud/rest/v1/app/push';
-    }
 
-    return 'http://52.16.43.57:8080/VectorCloud/rest/v1/app/push';
-};
+VectorWatch.prototype.flushPushPackets = function() {
+    return this.pushBuffer.flush();
+}
 
 /**
  * Sends the push packets
  * @param packets {PushPacket[]}
  */
 VectorWatch.prototype.sendPushPackets = function(packets) {
+
     if (!packets) {
         return this.pushBuffer.flush();
     }
@@ -241,6 +291,7 @@ VectorWatch.prototype.sendPushPackets = function(packets) {
         return packet.isAppPacket();
     });
 
+    var _this = this;
     var send = function(packets, pushUrl) {
         if (!packets.length) {
             return;
@@ -252,7 +303,7 @@ VectorWatch.prototype.sendPushPackets = function(packets) {
             json: packets.map(function(packet) {
                 return packet.toObject();
             }),
-            headers: { Authorization: this.getOption('token') }
+            headers: { Authorization: _this.getOption('token') }
         };
 
         request(options, function (err, response, body) {
@@ -271,6 +322,47 @@ VectorWatch.prototype.sendPushPackets = function(packets) {
 
     send(streamPackets, this.getStreamPushUrl());
     send(appPackets, this.getAppPushUrl());
+};
+
+/***
+ * Decide which logger to use
+ * @returns {winston.Logger}
+ * @private
+ */
+VectorWatch.prototype._decideLogger = function() {
+   if (process.env.GRAYLOG_URL) {
+        var winston = require('winston');
+        var GraylogTransport = require('./Logging/GraylogTransport');
+        return new (winston.Logger)({
+            transports: [
+                new GraylogTransport({
+                    level: 'info',
+                    handleExceptions: true,
+                    humanReadableUnhandledException: true,
+                    json: true,
+                    colorize: true,
+                    timestamp: true,
+                    url: this.getGraylogUrl()
+                })
+            ]
+        });
+   } else if (process.env.CONSOLE) {
+        var winston = require('winston');
+        return new (winston.Logger)({
+            transports: [
+                new (winston.transports.Console)({
+                    level: 'info',
+                    handleExceptions: true,
+                    humanReadableUnhandledException: true,
+                    json: true,
+                    colorize: true,
+                    timestamp: true,
+                })
+            ]
+        });
+    } else {
+        return require('./Logging/WinstonLoggerBrowser');
+    }
 };
 
 /**

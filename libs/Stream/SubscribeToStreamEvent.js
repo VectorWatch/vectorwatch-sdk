@@ -18,7 +18,15 @@ function SubscribeToStreamEvent() {
         credentialsKey = authProvider.getCredentialsKey(this.getAuthCredentials());
     }
 
-    storageProvider.storeUserSettingsAsync(this.getChannelLabel(), this.getUserSettings().toObject(), credentialsKey).then(function() {
+    var channelLabel, contextualUniqueLabel = null, userSettings = this.getUserSettings();
+    if (userSettings.settings.contextualUniqueLabel != null) {
+        contextualUniqueLabel =  this.getChannelLabel();
+        channelLabel = userSettings.settings.contextualUniqueLabel;
+    } else {
+        channelLabel = this.getChannelLabel();
+    }
+
+    storageProvider.storeUserSettingsAsync(channelLabel, this.getUserSettings().toObject(), credentialsKey, contextualUniqueLabel).then(function () {
         // do nothing
     });
 }
@@ -27,7 +35,7 @@ util.inherits(SubscribeToStreamEvent, StreamEvent);
 /**
  * @inheritdoc
  */
-SubscribeToStreamEvent.prototype.getResponseClass = function() {
+SubscribeToStreamEvent.prototype.getResponseClass = function () {
     return require('./SubscribeToStreamResponse.js');
 };
 
