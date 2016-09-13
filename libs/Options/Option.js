@@ -3,9 +3,10 @@
  * @param value {String}
  * @constructor
  */
-function Option(name, value) {
+function Option(name, value, permissions) {
     this.name = name;
     this.value = value;
+    this.permissions = permissions;
 }
 
 /**
@@ -15,7 +16,8 @@ function Option(name, value) {
 Option.prototype.toObject = function() {
     return {
         name: this.name,
-        value: this.value
+        value: this.value,
+        permissions: this.permissions
     };
 };
 
