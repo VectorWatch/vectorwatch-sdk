@@ -103,11 +103,7 @@ VectorWatch.prototype.getOption = function(optionName, defaultValue) {
 
 /**
  * Returns a new event for specific request
-<<<<<<< HEAD
  * @param req {Object}
-=======
- * @param {Object}
->>>>>>> 5a15ece2864ef0c16daa458a0c4f263e99001a76
  * @returns {Event}
  */
 
