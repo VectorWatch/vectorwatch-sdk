@@ -94,6 +94,7 @@ StreamPushPacket.prototype.isStreamPacket = function() {
 StreamPushPacket.prototype.toObject = function() {
     var packet = PushPacket.prototype.toObject.call(this);
     packet.channelLabel = this.channelLabel;
+    packet.contextualChannelLabel = this.contextualChannelLabel
     packet.d = this.value;
     packet.contentVersion = this.contentVersion;
     packet.streamVersion = this.streamVersion;

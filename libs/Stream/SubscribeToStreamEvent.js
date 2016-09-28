@@ -22,6 +22,7 @@ function SubscribeToStreamEvent() {
     if (userSettings.settings.contextualUniqueLabel != null) {
         contextualUniqueLabel =  this.getChannelLabel();
         channelLabel = userSettings.settings.contextualUniqueLabel;
+        userSettings.settings.contextualUniqueLabel = contextualUniqueLabel;
     } else {
         channelLabel = this.getChannelLabel();
     }
