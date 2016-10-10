@@ -86,6 +86,11 @@ GraylogTransport.prototype.log = function (level, msg, meta, callback) {
         msg = "Unexpected error"
     }
 
+    if (meta && (msg === '' || msg === undefined)) {
+        additional.sLevel = "error";
+        msg = common.log({ meta: meta});
+    }
+
     if (level && typeof this.logger[level] === "function") {
         this.logger[level](msg, msg, additional, new Date());
     }
