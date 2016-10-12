@@ -103,7 +103,7 @@ VectorWatch.prototype.getOption = function(optionName, defaultValue) {
 
 /**
  * Returns a new event for specific request
- * @param {Object}
+ * @param req {Object}
  * @returns {Event}
  */
 
@@ -184,6 +184,7 @@ VectorWatch.prototype.pushStreamValue = function(channelLabel, value, delay) {
 
     var packet = new StreamPushPacket(this)
         .setChannelLabel(channelLabel)
+        .setContextualChannelLabel(settingItem.contextualChannelLabel)
         .setValue(value)
         .setContentVersion(_self.getOption('contentVersion'))
         .setStreamVersion(_self.getOption('version'));

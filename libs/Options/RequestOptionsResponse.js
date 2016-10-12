@@ -20,12 +20,12 @@ util.inherits(RequestOptionsResponse, Response);
  * @param [value] {String}
  * @returns {Option}
  */
-RequestOptionsResponse.prototype.addOption = function(name, value) {
+RequestOptionsResponse.prototype.addOption = function(name, value, permissions) {
     var option;
     if (name instanceof Option) {
         option = name;
     } else {
-        option = new Option(name, value);
+        option = new Option(name, value, permissions);
     }
 
     this.options.push(option);

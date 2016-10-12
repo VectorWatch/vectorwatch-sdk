@@ -41,12 +41,12 @@ Setting.prototype.setDynamic = function(dynamic) {
  * @param [value] {String}
  * @returns {Option}
  */
-Setting.prototype.addOption = function(name, value) {
+Setting.prototype.addOption = function(name, value, permissions) {
     var option;
     if (name instanceof Option) {
         option = name;
     } else {
-        option = new Option(name, value);
+        option = new Option(name, value, permissions);
     }
 
     this.options.push(option);
