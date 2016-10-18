@@ -13,6 +13,7 @@ var InvalidAuthTokensPushPacket = require('./Auth/InvalidAuthTokensPushPacket.js
 var WebhookEvent = require('./Auth/WebhookEvent.js');
 var request = require('request');
 var url = require('url');
+var schedule = require('node-schedule');
 
 /**
  * @param [options] {Object}
@@ -27,7 +28,7 @@ function VectorWatch(options) {
     this.options = options || {};
     this.authProvider = null;
     this.storageProvider = null;
-    
+
     this.options.version = (typeof process.env.VERSION != 'undefined') ? process.env.VERSION : 1;
     this.options.contentVersion = (typeof process.env.CONTENT_P_VERSION != 'undefined') ? process.env.CONTENT_P_VERSION : 1;
 
@@ -42,12 +43,31 @@ function VectorWatch(options) {
 
     this.logger = this._decideLogger(options);
 
+    if (process.env.SCHEDULER) {
+        //default once an hour
+        var scheduleRule = process.env.SCHEDULE_EXPRESSION ? process.env.SCHEDULE_EXPRESSION : "* */1 * * *";
+        _this.logger.info("Scheduler set to: " + process.env.SCHEDULE_EXPRESSION);
+        schedule.scheduleJob(scheduleRule,  _this.executePushJob.bind(null,_this));
+    }
+
 }
-
-
 
 util.inherits(VectorWatch, EventEmitter);
 
+/**
+ * Receive this context and emit push events for all records from storage
+ * @param context
+ */
+VectorWatch.prototype.executePushJob = function(context) {
+    var _this = context;
+    _this.getStorageProvider().getAllUserSettingsAsync().then(function (records) {
+        if(records && records.length) {
+            records.forEach(function (record) {
+                _this.emit("push", record);
+            });
+        }
+    });
+}
 
 /**
  * Returns the auth provider used for authenticating the user on external services
@@ -223,8 +243,8 @@ VectorWatch.prototype.pushNotification = function(channelLabel, value, delay) {
  */
 VectorWatch.prototype.pushAppPacket = function (userKey, value, delay) {
     var packet = new AppPushPacket (this)
-            .setUserKey(userKey)
-            .addPushPacket(value);
+        .setUserKey(userKey)
+        .addPushPacket(value);
 
     this.pushBuffer.add(packet, delay);
 }
@@ -355,13 +375,14 @@ VectorWatch.prototype.sendPushPackets = function(packets) {
     send(appPackets, this.getAppPushUrl());
 };
 
+
 /***
  * Decide which logger to use
  * @returns {winston.Logger}
  * @private
  */
 VectorWatch.prototype._decideLogger = function() {
-   if (process.env.GRAYLOG_URL) {
+    if (process.env.GRAYLOG_URL) {
         var winston = require('winston');
         var GraylogTransport = require('./Logging/GraylogTransport');
         return new (winston.Logger)({
@@ -377,7 +398,7 @@ VectorWatch.prototype._decideLogger = function() {
                 })
             ]
         });
-   } else if (process.env.CONSOLE) {
+    } else if (process.env.CONSOLE) {
         var winston = require('winston');
         return new (winston.Logger)({
             transports: [
