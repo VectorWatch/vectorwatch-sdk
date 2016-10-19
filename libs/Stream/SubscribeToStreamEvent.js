@@ -10,6 +10,10 @@ function SubscribeToStreamEvent() {
 
     this.eventName = 'subscribe';
 
+}
+util.inherits(SubscribeToStreamEvent, StreamEvent);
+
+SubscribeToStreamEvent.prototype.emit = function(response) {
     var authProvider = this.getServer().getAuthProvider();
     var storageProvider = this.getServer().getStorageProvider();
 
@@ -17,12 +21,16 @@ function SubscribeToStreamEvent() {
     if (authProvider) {
         credentialsKey = authProvider.getCredentialsKey(this.getAuthCredentials());
     }
-
+    //save to DB then emit 'subscribe' event
+    var _self = this;
     storageProvider.storeUserSettingsAsync(this.getChannelLabel(), this.getUserSettings().toObject(), credentialsKey).then(function() {
-        // do nothing
+        var emitted = _self.getServer().emit(_self.getEventName(), _self, response);
+        if (!emitted) {
+            response.send();
+        }
     });
-}
-util.inherits(SubscribeToStreamEvent, StreamEvent);
+    return true;
+};
 
 /**
  * @inheritdoc
