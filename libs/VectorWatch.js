@@ -45,7 +45,7 @@ function VectorWatch(options) {
 
     if (process.env.SCHEDULE_EXPRESSION) {
         _this.logger.info("Scheduler set to: " + process.env.SCHEDULE_EXPRESSION);
-        schedule.scheduleJob(process.env.SCHEDULE_EXPRESSION,  _this.executePushJob.bind(null,_this));
+        schedule.scheduleJob(process.env.SCHEDULE_EXPRESSION,  _this.executeScheduledJob.bind(null,_this));
     }
 
 }
@@ -56,7 +56,7 @@ util.inherits(VectorWatch, EventEmitter);
  * Receive this context and emit push events for all records from storage
  * @param context
  */
-VectorWatch.prototype.executePushJob = function(context) {
+VectorWatch.prototype.executeScheduledJob = function(context) {
     var _this = context;
     _this.getStorageProvider().getAllUserSettingsAsync().then(function (records) {
         if(records && records.length) {
