@@ -43,11 +43,9 @@ function VectorWatch(options) {
 
     this.logger = this._decideLogger(options);
 
-    if (process.env.SCHEDULER) {
-        //default once an hour
-        var scheduleRule = process.env.SCHEDULE_EXPRESSION ? process.env.SCHEDULE_EXPRESSION : "* */1 * * *";
+    if (process.env.SCHEDULE_EXPRESSION) {
         _this.logger.info("Scheduler set to: " + process.env.SCHEDULE_EXPRESSION);
-        schedule.scheduleJob(scheduleRule,  _this.executePushJob.bind(null,_this));
+        schedule.scheduleJob(process.env.SCHEDULE_EXPRESSION,  _this.executePushJob.bind(null,_this));
     }
 
 }
@@ -63,7 +61,7 @@ VectorWatch.prototype.executePushJob = function(context) {
     _this.getStorageProvider().getAllUserSettingsAsync().then(function (records) {
         if(records && records.length) {
             records.forEach(function (record) {
-                _this.emit("push", record);
+                _this.emit("schedule", record);
             });
         }
     });
