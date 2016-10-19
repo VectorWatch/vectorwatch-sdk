@@ -92,8 +92,8 @@ VectorWatch.prototype.setAuthProvider = function(authProvider) {
  */
 VectorWatch.prototype.getStorageProvider = function() {
     if (!this.storageProvider) {
-        var MemoryStorageProvider = require('vectorwatch-storageprovider-memory');
-        this.setStorageProvider(new MemoryStorageProvider());
+        var StorageProvider = require('vectorwatch-storageprovider');
+        this.setStorageProvider(new StorageProvider());
     }
 
     return this.storageProvider;
