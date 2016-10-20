@@ -15,6 +15,7 @@ var request = require('request');
 var url = require('url');
 var schedule = require('node-schedule');
 
+
 /**
  * @param [options] {Object}
  * @constructor
@@ -41,12 +42,17 @@ function VectorWatch(options) {
         _this.sendPushPackets(packets);
     });
 
-    this.logger = this._decideLogger(options);
+    VectorWatch.logger = this._decideLogger();
+    this.logger = VectorWatch.logger;
 
     if (process.env.SCHEDULE_EXPRESSION) {
         _this.logger.info("Scheduler set to: " + process.env.SCHEDULE_EXPRESSION);
         schedule.scheduleJob(process.env.SCHEDULE_EXPRESSION,  _this.executeScheduledJob.bind(null,_this));
     }
+
+    this.server = http.createServer(this.getMiddleware()).listen((process.env.PORT || 8080));
+    _this.logger.info("Server " + process.env.STREAM_UUID || process.env.APP_UUID + " started ");
+
 
 }
 
@@ -416,15 +422,15 @@ VectorWatch.prototype._decideLogger = function() {
 };
 
 /**
- * Creates an HTTP server to listen for VectorWatch events
- * @param port {Number}
- * @param cb {Function}
+ * @deprecated Creates an HTTP server to listen for VectorWatch events
+ * Server is now started by default. This method still can be used
+ * @param cb {Function} - execute cb after server is created
  */
 VectorWatch.prototype.createServer = function(cb) {
-    var server = http.createServer(this.getMiddleware());
-
-    server.listen((process.env.PORT || 8080), cb);
-    return server;
+    if (cb) {
+        cb();
+    }
+    return this.server;
 };
 
 VectorWatch.TTL = consts.TTL;
