@@ -185,13 +185,13 @@ VectorWatch.prototype.getMiddleware = function() {
                 response.setExpired(true);
             }, _this.getOption('eventMaxTimeout', 30000));
 
-            if (!event.emit(response)) {
-                response.send();
-            }
-
             response.on('send', function() {
                 clearTimeout(timeout);
             });
+
+            if (!event.emit(response)) {
+                response.send();
+            }
         });
     };
 };

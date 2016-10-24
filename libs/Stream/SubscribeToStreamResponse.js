@@ -23,6 +23,25 @@ SubscribeToStreamResponse.prototype.setValue = function(value) {
     return this;
 };
 
+
+/**
+ * Sends back to the vector cloud a bad request error
+ * @param message {String}
+ */
+SubscribeToStreamResponse.prototype.sendInvalidDataError = function(message) {
+
+    var _channelLabel = this.event.getChannelLabel();
+    var _logger = this.server.logger;
+
+    this.getServer().getStorageProvider().removeUserSettingsAsync(_channelLabel).then(function() {
+        _logger.error("Delete from DB " + _channelLabel);
+    }).catch(function(err) {
+        _logger.error("Cannot delete from DB " + _channelLabel + " " + JSON.stringify(err));
+    });
+
+    SubscribeToStreamResponse.super_.prototype.sendBadRequestError.apply(this, message);
+};
+
 /**
  * @inheritdoc
  */
