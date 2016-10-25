@@ -290,17 +290,6 @@ VectorWatch.prototype.getStreamPushUrl = function() {
 
 
 /**
- * Returns elasticsearch url based on environment
- * @returns {String}
- */
-VectorWatch.prototype.getElasticSearchUrl = function() {
-    if (process.env.ELASTICSEARCH_URL) {
-        return process.env.ELASTICSEARCH_URL;
-    }
-    return 'http://localhost:9200';
-};
-
-/**
  * Returns graylog url based on environment
  * @returns {String}
  */
