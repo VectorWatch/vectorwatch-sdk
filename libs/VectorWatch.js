@@ -67,6 +67,12 @@ VectorWatch.prototype.executeScheduledJob = function(context) {
     _this.getStorageProvider().getAllUserSettingsAsync().then(function (records) {
         if(records && records.length) {
             records.forEach(function (record) {
+                record.pushUpdate = function(streamText, delay) {
+                    return _this.pushStreamValue(record.channelLabel, streamText, delay);
+                }
+                record.pushNotification = function(notificationText, delay) {
+                    return _this.pushNotification(record.channelLabel, notificationText, delay);
+                }
                 _this.emit("schedule", record);
             });
         }
