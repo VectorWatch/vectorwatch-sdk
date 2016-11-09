@@ -49,9 +49,9 @@ function VectorWatch(options) {
         _this.logger.info("Scheduler set to: " + process.env.SCHEDULE_EXPRESSION);
         schedule.scheduleJob(process.env.SCHEDULE_EXPRESSION,  _this.executeScheduledJob.bind(null,_this));
     }
-
+    _this.logger.warn("Starting server " + process.env.STREAM_NAME || process.env.APP_NAME);
     this.server = http.createServer(this.getMiddleware()).listen((process.env.PORT || 8080));
-    _this.logger.info("Server " + process.env.STREAM_UUID || process.env.APP_UUID + " started ");
+    _this.logger.warn("Server started " + process.env.STREAM_NAME|| process.env.APP_NAME);
 
 
 }
