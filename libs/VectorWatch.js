@@ -73,9 +73,13 @@ VectorWatch.prototype.executeScheduledJob = function(context) {
                 record.pushNotification = function(notificationText, delay) {
                     return _this.pushNotification(record.channelLabel, notificationText, delay);
                 }
-                _this.emit("schedule", record);
             });
         }
+        else {
+            records = [];
+        }
+
+        _this.emit("schedule", records);
     });
 }
 
