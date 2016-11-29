@@ -439,3 +439,7 @@ VectorWatch.Buttons = consts.Buttons;
 VectorWatch.ButtonEvents = consts.ButtonEvents;
 
 module.exports = VectorWatch;
+
+VectorWatch.getSchedule = function() {
+  return schedule;
+}
